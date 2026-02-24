@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FLIP FLOP · Normal edition</title>
+  <style>
+    /* ---------- completely normal, clean, no retro, no vintage, just simple ---------- */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #e9eef2;   /* plain light grey-blue */
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      margin: 0;
+    }
+
+    .game-container {
+      max-width: 750px;
+      width: 100%;
+      background: white;
+      border-radius: 24px;
+      padding: 24px 24px 28px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      border: 1px solid #cfd9de;
+    }
+
+    .header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      background: #f2f6f9;
+      border-radius: 40px;
+      padding: 12px 18px 12px 24px;
+      margin-bottom: 28px;
+      border: 1px solid #cbd5e1;
+    }
+
+    .title {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .title h1 {
+      font-size: 2.2rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      color: #1e293b;
+    }
+
+    .flip-icon {
+      font-size: 2rem;
+      color: #475569;
+    }
+
+    .stats {
+      display: flex;
+      gap: 20px;
+      background: #ffffff;
+      padding: 6px 20px;
+      border-radius: 40px;
+      border: 1px solid #b9c7d9;
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 1.2rem;
+      font-weight: 500;
+      color: #0f172a;
+    }
+
+    .stat-item span {
+      background: #e1e8f0;
+      padding: 2px 14px;
+      border-radius: 30px;
+      font-weight: 600;
+      color: #0b1e33;
+    }
+
+    .new-game-btn {
+      background: #ffffff;
+      border: 2px solid #2c3e50;
+      font-size: 1.3rem;
+      font-weight: 600;
+      padding: 10px 24px;
+      border-radius: 40px;
+      color: #1e293b;
+      cursor: pointer;
+      transition: 0.1s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #f8fafc;
+    }
+
+    .new-game-btn:hover {
+      background: #e2e8f0;
+    }
+
+    .new-game-btn:active {
+      background: #cbd5e1;
+      transform: scale(0.98);
+    }
+
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin: 20px 0 18px;
+    }
+
+    /* CARD — normal, flat, minimal */
+    .card {
+      aspect-ratio: 1 / 1.1;
+      background: transparent;
+      perspective: 800px;
+      cursor: pointer;
+    }
+
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.2s ease;
+      transform-style: preserve-3d;
+      border-radius: 16px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+    }
+
+    .card.flipped .card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .card-front, .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #b0c4d9;
+    }
+
+    .card-back {
+      background: #a2b9d1;
+      background: #b8ccE0;
+      transform: rotateY(0deg);
+      font-size: 2.8rem;
+      color: #334e68;
+      font-weight: 400;
+    }
+
+    .card-front {
+      background: #ffffff;
+      transform: rotateY(180deg);
+      font-size: 3.2rem;
+      border: 1px solid #abc0d4;
+      color: #0b2a41;
+    }
+
+    .card.matched {
+      cursor: default;
+      filter: brightness(0.98);
+    }
+
+    .card.matched .card-front {
+      background: #dee9f2;
+      border-color: #8faec9;
+    }
+
+    .card.matched .card-inner {
+      transform: rotateY(180deg);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    .message-area {
+      text-align: center;
+      margin: 12px 0 6px;
+      font-size: 1.3rem;
+      min-height: 2.8rem;
+      color: #1e3a5f;
+      background: #ecf3fa;
+      padding: 8px 20px;
+      border-radius: 40px;
+      display: inline-block;
+      border: 1px solid #b9cfec;
+      font-weight: 500;
+    }
+
+    .footer-note {
+      display: flex;
+      justify-content: center;
+      color: #5f7d9c;
+      font-size: 0.9rem;
+      margin-top: 18px;
+      border-top: 1px solid #d0deed;
+      padding-top: 14px;
+    }
+
+    @media (max-width: 500px) {
+      .title h1 { font-size: 1.7rem; }
+      .stats { gap: 10px; padding: 4px 12px; }
+      .stat-item { font-size: 1rem; }
+      .new-game-btn { font-size: 1.1rem; padding: 8px 16px; }
+      .grid-container { gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+<div class="game-container">
+  <div class="header">
+    <div class="title">
+      <span class="flip-icon">🃏</span>
+      <h1>FLIP FLOP</h1>
+      <span class="flip-icon">🃏</span>
+    </div>
+    <div class="stats">
+      <div class="stat-item">MOVES <span id="movesCounter">0</span></div>
+      <div class="stat-item">PAIRS <span id="pairsMatched">0</span></div>
+    </div>
+    <button class="new-game-btn" id="newGameBtn">↻ NEW GAME</button>
+  </div>
+
+  <!-- standard 4x4 grid (8 pairs) -->
+  <div class="grid-container" id="grid"></div>
+
+  <div style="display: flex; justify-content: center;">
+    <div class="message-area" id="messageDisplay">Click any card to start</div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    // ---------- plain, ordinary symbols ----------
+    const SYMBOLS = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼']; // 8 pairs
+    const TOTAL_PAIRS = 8;
+    const TOTAL_CARDS = 16;
+
+    // game state
+    let cards = [];
+    let lockBoard = false;
+    let firstIdx = null;
+    let secondIdx = null;
+    let moves = 0;
+    let matchedPairs = 0;
+    let flipTimer = null;
+
+    // DOM elements
+    const gridEl = document.getElementById('grid');
+    const movesSpan = document.getElementById('movesCounter');
+    const matchedSpan = document.getElementById('pairsMatched');
+    const messageEl = document.getElementById('messageDisplay');
+    const newGameBtn = document.getElementById('newGameBtn');
+
+    // simple shuffle
+    const shuffleArray = (arr) => {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    };
+
+    // build fresh deck
+    const createFreshDeck = () => {
+      const deck = [];
+      for (let i = 0; i < TOTAL_PAIRS; i++) {
+        const sym = SYMBOLS[i];
+        deck.push({ id: crypto.randomUUID ? crypto.randomUUID() : `c1-${i}`, symbol: sym, matched: false, flipped: false });
+        deck.push({ id: crypto.randomUUID ? crypto.randomUUID() : `c2-${i}`, symbol: sym, matched: false, flipped: false });
+      }
+      return shuffleArray(deck);
+    };
+
+    const updateCounters = () => {
+      movesSpan.textContent = moves;
+      matchedSpan.textContent = matchedPairs;
+    };
+
+    const clearTimer = () => {
+      if (flipTimer) {
+        clearTimeout(flipTimer);
+        flipTimer = null;
+      }
+    };
+
+    // reset the two cards if they don't match
+    const resetUnmatched = () => {
+      if (firstIdx !== null && secondIdx !== null) {
+        const c1 = cards[firstIdx];
+        const c2 = cards[secondIdx];
+        if (c1 && !c1.matched) c1.flipped = false;
+        if (c2 && !c2.matched) c2.flipped = false;
+      }
+      renderGrid();
+      lockBoard = false;
+      firstIdx = null;
+      secondIdx = null;
+    };
+
+    // check match or mismatch
+    const evaluateMatch = () => {
+      if (firstIdx === null || secondIdx === null) return;
+
+      const cardA = cards[firstIdx];
+      const cardB = cards[secondIdx];
+      const isMatch = (cardA.symbol === cardB.symbol);
+
+      moves++;
+      
+      if (isMatch) {
+        cardA.matched = true;
+        cardB.matched = true;
+        cardA.flipped = true;   // stays showing front
+        cardB.flipped = true;
+        matchedPairs++;
+        updateCounters();
+
+        lockBoard = false;
+        firstIdx = null;
+        secondIdx = null;
+        renderGrid();
+
+        if (matchedPairs === TOTAL_PAIRS) {
+          messageEl.textContent = '✅ You win! Congratulations!';
+        } else {
+          messageEl.textContent = '✓ Match found!';
+        }
+      } else {
+        // mismatch
+        messageEl.textContent = '✗ Not a match';
+        lockBoard = true;   // prevent clicks during flip back
+        renderGrid();
+
+        clearTimer();
+        flipTimer = setTimeout(() => {
+          // flip them back if they are still not matched
+          if (cards[firstIdx] && !cards[firstIdx].matched) cards[firstIdx].flipped = false;
+          if (cards[secondIdx] && !cards[secondIdx].matched) cards[secondIdx].flipped = false;
+
+          firstIdx = null;
+          secondIdx = null;
+          lockBoard = false;
+          renderGrid();
+          messageEl.textContent = 'keep trying';
+          flipTimer = null;
+        }, 700);
+      }
+      updateCounters();
+    };
+
+    // ---------- click handler ----------
+    const onCardClick = (index) => {
+      if (lockBoard) return;
+      if (!cards[index]) return;
+      if (cards[index].matched) return;
+      if (cards[index].flipped) return;
+      if (firstIdx === index) return;   // same card
+
+      // first card
+      if (firstIdx === null) {
+        cards[index].flipped = true;
+        firstIdx = index;
+        renderGrid();
+        return;
+      }
+
+      // second card
+      if (secondIdx === null && firstIdx !== null) {
+        cards[index].flipped = true;
+        secondIdx = index;
+        renderGrid();
+
+        evaluateMatch();   // will handle match/mismatch and locking
+      }
+    };
+
+    // render all cards from state
+    function renderGrid() {
+      let html = '';
+      for (let i = 0; i < cards.length; i++) {
+        const card = cards[i];
+        const flippedClass = card.flipped ? 'flipped' : '';
+        const matchedClass = card.matched ? 'matched' : '';
+        html += `
+          <div class="card ${flippedClass} ${matchedClass}" data-index="${i}">
+            <div class="card-inner">
+              <div class="card-front">${card.symbol}</div>
+              <div class="card-back">?</div>
+            </div>
+          </div>
+        `;
+      }
+      gridEl.innerHTML = html;
+
+      // attach event listeners
+      document.querySelectorAll('.card').forEach(el => {
+        const idx = el.getAttribute('data-index');
+        if (idx !== null) {
+          el.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const numIdx = parseInt(idx, 10);
+            if (!isNaN(numIdx)) onCardClick(numIdx);
+          });
+        }
+      });
+    }
+
+    // reset everything to default
+    const resetGame = () => {
+      clearTimer();
+      cards = createFreshDeck();
+      cards.forEach(c => { c.flipped = false; c.matched = false; });
+
+      firstIdx = null;
+      secondIdx = null;
+      lockBoard = false;
+      moves = 0;
+      matchedPairs = 0;
+
+      updateCounters();
+      messageEl.textContent = 'Click any card to start';
+      renderGrid();
+    };
+
+    // initialise
+    resetGame();
+
+    // new game button
+    newGameBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      resetGame();
+    });
+
+  })();
+</script>
+</body>
+</html>
