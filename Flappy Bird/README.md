@@ -7,4 +7,4 @@ This Flappy Bird game captures the classic challenge with a clean, modern look.
 
 <img width="1346" height="631" alt="image" src="https://github.com/user-attachments/assets/81e22428-4e04-472f-9e6e-40d5e31b4829" />
 
-### The image above shows the Game
+##### The image above shows the Game
