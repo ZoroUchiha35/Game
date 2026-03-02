@@ -7,5 +7,5 @@ This is a standard memory pair-matching game with a clean, modern interface.
 
 <img width="908" height="630" alt="image" src="https://github.com/user-attachments/assets/82a74e38-9892-4ab9-a110-dd5e8df353a9" />
 
-###### Image showing a sample of the Game
+##### Image showing a sample of the Game
 
