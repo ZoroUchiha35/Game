@@ -25,7 +25,7 @@ Play all games here: **(https://zorouchiha35.github.io/Game/)**
 <br><br><br>
 <p align="center">
   <img src="https://img.shields.io/badge/status-live-brightgreen?style=for-the-badge" alt="Live">
-  <img src="https://img.shields.io/badge/games-24-blue?style=for-the-badge" alt="Games">
+  <img src="https://img.shields.io/badge/games-2-blue?style=for-the-badge" alt="Games">
   <img src="https://img.shields.io/badge/platform-web-purple?style=for-the-badge" alt="Platform">
   <img src="https://img.shields.io/badge/license-MIT-orange?style=for-the-badge" alt="License">
 </p>
