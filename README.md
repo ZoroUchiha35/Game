@@ -21,8 +21,3 @@ Play all games here: **(https://zorouchiha35.github.io/Game/)**
 - **Lightweight** – Each game is a single HTML file
 - **Open Source** – Code is here for you to explore
 
-## 🚀 How to Run Locally
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/[your-username]/Game.git
