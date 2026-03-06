@@ -6,6 +6,11 @@ Welcome to my personal game collection! This repository contains browser-based g
 
 Play all games here: **(https://zorouchiha35.github.io/Game/)**
 
+#### How to Play
+1. Click the link then choose the game you want
+2. Start playing immediately
+3. No downloads needed
+
 ## 📁 Games Available
 
 |     Game                 |         Description                                    |
