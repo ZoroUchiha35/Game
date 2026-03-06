@@ -22,8 +22,7 @@ Play all games here: **(https://zorouchiha35.github.io/Game/)**
 - **Open Source** – Code is here for you to explore
 
 
-### Badge Section
-
+<br>
 <p align="center">
   <img src="https://img.shields.io/badge/status-live-brightgreen?style=for-the-badge" alt="Live">
   <img src="https://img.shields.io/badge/games-2-blue?style=for-the-badge" alt="Games">
