@@ -4,7 +4,7 @@ Welcome to my personal game collection! This repository contains browser-based g
 
 ## 🎯 Live Demo
 
-Play all games here: **(https://zorouchiha35.github.io/Game/)**
+Play all games here: **https://zorouchiha35.github.io/Game/**
 
 #### How to Play
 1. Click the link then choose the game you want
