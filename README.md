@@ -17,6 +17,7 @@ Play all games here: **https://zorouchiha35.github.io/Game/**
 |--------------------------|--------------------------------------------------------|
 | 🐦 **Flappy Bird**      | Tap to fly, avoid pipes. The classic arcade challenge.  |
 | 🧠 **Flip Flop Memory** | Test your memory. Match pairs, train your brain.        |
+| 🧠 **Flip Flop Memory** | Test your memory. Match pairs, train your brain.        |
 
 ## ✨ Features
 
