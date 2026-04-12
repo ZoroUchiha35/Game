@@ -17,7 +17,7 @@ Play all games here: **https://zorouchiha35.github.io/Game/**
 |--------------------------|--------------------------------------------------------|
 | 🐦 **Flappy Bird**      | Tap to fly, avoid pipes. The classic arcade challenge.  |
 | 🧠 **Flip Flop Memory** | Test your memory. Match pairs, train your brain.        |
-| 🏓 **Ping Pong**        | Test your memory. Match pairs, train your brain.        |
+| 🏓 **Ping Pong**        | Hit the ball past your opponent to score. Classic two-player arcade fun.  |
 
 ## ✨ Features
 
