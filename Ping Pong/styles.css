@@ -1,0 +1,56 @@
+:root{
+  --bg:#0b1220;
+  --panel:#071021;
+  --accent:#ffffff;
+  --muted:#9aa6b2;
+  --paddle:#ffffff;
+  --ball:#ffd166;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;}
+
+body{
+  background: linear-gradient(180deg, #061222 0%, #0b1220 100%);
+  color:var(--accent);
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+}
+
+.container{
+  width: 860px;
+  max-width:calc(100vw - 40px);
+  text-align:center;
+}
+
+h1{
+  font-weight:600;
+  margin-bottom:8px;
+}
+
+#scoreboard{
+  font-size:28px;
+  margin-bottom:12px;
+  color:var(--accent);
+}
+
+.separator{opacity:0.7;margin:0 8px;}
+
+canvas#game{
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.03));
+  border:2px solid rgba(255,255,255,0.06);
+  border-radius:8px;
+  display:block;
+  margin:0 auto;
+  cursor: none; /* hide default cursor to make mouse control feel like paddle */
+  box-shadow: 0 6px 30px rgba(2,6,23,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+}
+
+.instructions{
+  margin-top:12px;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.3;
+}
