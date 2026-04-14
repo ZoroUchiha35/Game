@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Playful Prestige · GameZone Collection</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%231F2A44'/%3E%3Ctext x='50' y='70' font-size='64' text-anchor='middle' fill='%23FFE599' font-family='system-ui, sans-serif'%3E🎮%3C/text%3E%3C/svg%3E">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', 'Inter', sans-serif;
+            background: #F5F5F0;  /* warm off-white base */
+            min-height: 100vh;
+            padding: 2rem 1.5rem;
+            position: relative;
+            color: #1F2A44;
+        }
+
+        /* ——— SOFT FORMAL BACKGROUND with playful patterns ——— */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: 
+                radial-gradient(circle at 15% 30%, rgba(111, 168, 220, 0.08) 2px, transparent 2px),
+                radial-gradient(circle at 75% 70%, rgba(180, 167, 214, 0.08) 1.8px, transparent 2px),
+                radial-gradient(circle at 40% 85%, rgba(147, 233, 190, 0.06) 2.5px, transparent 2.5px);
+            background-size: 48px 48px, 60px 60px, 72px 72px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* soft geometric floating stars & dots (extra charm) */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><path fill="none" stroke="%23D6B656" stroke-width="1.2" opacity="0.2" d="M30 40 L35 30 L40 40 L35 50 Z M160 120 L165 112 L170 120 L165 128 Z M80 170 L84 162 L88 170 L84 178 Z M130 30 L134 23 L138 30 L134 37 Z"/><circle cx="55" cy="150" r="2" fill="%236FA8DC" opacity="0.25"/><circle cx="170" cy="55" r="2.5" fill="%23FFE599" opacity="0.3"/></svg>');
+            background-repeat: repeat;
+            background-size: 70px 70px;
+            opacity: 0.4;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* ——— HEADER: refined museum meets joyful toy ——— */
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: softReveal 0.7s cubic-bezier(0.2, 0.9, 0.4, 1.1) both;
+        }
+
+        @keyframes softReveal {
+            0% { opacity: 0; transform: translateY(28px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .title {
+            font-size: 4.2rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #1F2A44 0%, #2E2E2E 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            text-shadow: none;
+            margin-bottom: 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .title span {
+            background: none;
+            color: #D6B656;
+            font-size: 3.5rem;
+            filter: drop-shadow(0 2px 6px rgba(214, 182, 86, 0.3));
+            animation: gentleFloat 3s infinite ease-in-out;
+            display: inline-block;
+        }
+
+        @keyframes gentleFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .subtitle {
+            font-size: 1.15rem;
+            background: rgba(255, 255, 245, 0.75);
+            backdrop-filter: blur(8px);
+            padding: 0.7rem 1.8rem;
+            border-radius: 60px;
+            display: inline-block;
+            font-weight: 500;
+            color: #2E2E2E;
+            border: 1px solid rgba(111, 168, 220, 0.5);
+            box-shadow: 0 6px 14px rgba(31, 42, 68, 0.05);
+        }
+
+        /* ——— GAMES GRID: clean, floating, museum-card with playful soul ——— */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+            gap: 2rem;
+            margin: 1rem 0 2rem;
+        }
+
+        .game-card {
+            background: rgba(255, 255, 245, 0.92);
+            backdrop-filter: blur(4px);
+            border-radius: 2rem;
+            padding: 2rem 1.5rem 1.8rem;
+            transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            cursor: pointer;
+            border: 1px solid rgba(111, 168, 220, 0.25);
+            box-shadow: 0 20px 32px -16px rgba(31, 42, 68, 0.12);
+            text-align: center;
+            position: relative;
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 40px -18px rgba(31, 42, 68, 0.25);
+            border-color: rgba(214, 182, 86, 0.6);
+            background: #FFFFFF;
+        }
+
+        /* subtle accent line (childlike surprise) */
+        .game-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 10%;
+            width: 80%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #D6B656, #FFE599, #D6B656, transparent);
+            border-radius: 3px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .game-card:hover::after {
+            opacity: 0.7;
+        }
+
+        .game-icon {
+            font-size: 5rem;
+            margin-bottom: 0.8rem;
+            filter: drop-shadow(0 8px 12px rgba(0,0,0,0.08));
+            transition: transform 0.2s ease;
+            display: inline-block;
+        }
+
+        .game-card:hover .game-icon {
+            transform: scale(1.02) rotate(2deg);
+        }
+
+        .game-card h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(125deg, #1F2A44, #4a3f7a);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+            margin-bottom: 0.75rem;
+            text-shadow: none;
+        }
+
+        .game-description {
+            color: #3b3b48;
+            font-size: 0.98rem;
+            line-height: 1.5;
+            margin: 0.8rem 0 1.2rem;
+            font-weight: 450;
+        }
+
+        .game-stats {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.6rem;
+        }
+
+        .stat {
+            background: #f1efe7;
+            padding: 0.3rem 0.9rem;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #1F2A44;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            letter-spacing: -0.2px;
+            border: 1px solid rgba(111, 168, 220, 0.3);
+        }
+
+        /* pill button — prestige meets bounce */
+        .play-button {
+            display: inline-block;
+            padding: 0.8rem 2rem;
+            background: #1F2A44;
+            color: #FFE599;
+            font-weight: 600;
+            font-size: 1rem;
+            border-radius: 60px;
+            text-decoration: none;
+            transition: all 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            border: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            letter-spacing: 0.5px;
+        }
+
+        .play-button:hover {
+            background: #D6B656;
+            color: #1F2A44;
+            transform: scale(1.02) translateY(-3px);
+            box-shadow: 0 12px 20px -10px rgba(214, 182, 86, 0.5);
+        }
+
+        .play-button:active {
+            transform: scale(0.96);
+            transition: 0.05s;
+        }
+
+        /* coming soon — soft playful card */
+        .coming-soon {
+            background: rgba(245, 245, 240, 0.8);
+            backdrop-filter: blur(6px);
+            border-radius: 2rem;
+            padding: 2rem 1.8rem;
+            margin: 2rem auto 2rem;
+            max-width: 650px;
+            border: 2px dashed rgba(180, 167, 214, 0.6);
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .coming-soon:hover {
+            border-color: #D6B656;
+            background: #fffef7;
+        }
+
+        .coming-soon span {
+            font-size: 2.8rem;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.05));
+        }
+
+        .coming-soon h3 {
+            font-size: 1.7rem;
+            font-weight: 600;
+            color: #1F2A44;
+            margin: 0.5rem 0 0.2rem;
+        }
+
+        /* footer with friendly elegance */
+        .footer {
+            text-align: center;
+            margin-top: 4rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(111, 168, 220, 0.25);
+            font-size: 0.9rem;
+            color: #4a4e6b;
+        }
+
+        .social-links {
+            margin-top: 0.8rem;
+            display: flex;
+            justify-content: center;
+            gap: 1.3rem;
+        }
+
+        .social-links a {
+            font-size: 1.5rem;
+            text-decoration: none;
+            background: #ecebe4;
+            width: 42px;
+            height: 42px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: 0.2s ease;
+            color: #1F2A44;
+        }
+
+        .social-links a:hover {
+            background: #D6B656;
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 8px 14px rgba(214, 182, 86, 0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 720px) {
+            body { padding: 1.2rem; }
+            .title { font-size: 2.6rem; }
+            .title span { font-size: 2.2rem; }
+            .game-card { padding: 1.4rem; }
+            .game-icon { font-size: 3.8rem; }
+        }
+
+        /* tiny floating particles (very delicate) */
+        .floating-joy {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1;
+            background: radial-gradient(circle, #FFE599, #93E9BE);
+            border-radius: 50%;
+            opacity: 0.2;
+            filter: blur(3px);
+            animation: slowDrift 22s infinite alternate;
+        }
+
+        @keyframes slowDrift {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(30px, -25px) scale(1.2); }
+        }
+
+        /* Button subtle click feedback */
+        .game-card:active {
+            transform: scale(0.99);
+            transition-duration: 0.05s;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- refined header with joyful charm -->
+    <div class="header">
+        <h1 class="title">
+            <span>🎮</span> GameZone <span>✨</span>
+        </h1>
+        <div class="subtitle">
+            ⚡ polished collection · playful prestige ⚡
+        </div>
+    </div>
+
+    <!-- Games Grid: three premium experiences -->
+    <div class="games-grid">
+        <!-- Flappy Bird card (museum card but birdie energy) -->
+        <div class="game-card" data-game="flappy">
+            <div class="game-icon">🐦✨</div>
+            <h2>Flappy Bird</h2>
+            <p class="game-description">
+                Tap with rhythm, glide through pipes. Classic arcade with a breezy challenge.
+            </p>
+            <div class="game-stats">
+                <span class="stat">🎯 one-tap</span>
+                <span class="stat">🏆 endless</span>
+                <span class="stat">⚡ reflexes</span>
+            </div>
+            <a href="Flappy Bird/" class="play-button" data-link="flappy">Play Now →</a>
+        </div>
+
+        <!-- Flip Flop Memory: brain training with elegance -->
+        <div class="game-card" data-game="memory">
+            <div class="game-icon">🧠🔁</div>
+            <h2>Flip Flop Memory</h2>
+            <p class="game-description">
+                Sharpen your focus! Pair matching cards in this gentle but thrilling memory duel.
+            </p>
+            <div class="game-stats">
+                <span class="stat">🃏 match pairs</span>
+                <span class="stat">🎯 concentration</span>
+                <span class="stat">⭐ brain gym</span>
+            </div>
+            <a href="Flip Flop Memory/" class="play-button" data-link="memory">Play Now →</a>
+        </div>
+
+        <!-- Ping Pong: elegant AI duel -->
+        <div class="game-card" data-game="pong">
+            <div class="game-icon">🏓💫</div>
+            <h2>Ping Pong</h2>
+            <p class="game-description">
+                Precision volleys & fast reflexes. Beat the AI in this smooth table tennis classic.
+            </p>
+            <div class="game-stats">
+                <span class="stat">⚡ first to 10</span>
+                <span class="stat">🎾 smooth physics</span>
+                <span class="stat">⭐ arcade spirit</span>
+            </div>
+            <a href="Ping Pong/" class="play-button" data-link="pong">Play Now →</a>
+        </div>
+    </div>
+
+    <!-- Coming soon: playful promise -->
+    <div class="coming-soon">
+        <span>🚀 🧸 🎨</span>
+        <h3>More games on the horizon</h3>
+        <p style="color: #4a5568; margin-top: 0.5rem;">Puzzle realms · cozy adventures · strategy garden</p>
+        <div style="margin-top: 0.8rem; font-size: 0.85rem; background: #F5F5F0; display: inline-block; padding: 0.2rem 1rem; border-radius: 40px;">✨ stay curious ✨</div>
+    </div>
+
+    <div class="footer">
+        <p>crafted with gentle code &nbsp;❀&nbsp;  playful prestige edition  &nbsp;❀&nbsp;  © 2026 GameZone</p>
+        <div class="social-links">
+            <a href="#" aria-label="GitHub" title="GameHub">📦</a>
+            <a href="#" aria-label="Twitter" title="Playful feed">🐦</a>
+            <a href="#" aria-label="Instagram" title="Gallery">📷</a>
+            <a href="#" aria-label="Discord" title="Community">💬</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ----------------------------------------------
+    //  “Playful Prestige” micro-interactions
+    //  + smooth card navigation + soft console greeting
+    // ----------------------------------------------
+
+    // elegant redirects with subtle haptic (no aggressive flashes)
+    const cards = document.querySelectorAll('.game-card');
+    const playBtns = document.querySelectorAll('.play-button');
+
+    // unified navigation: both card click and button click
+    function navigateToGame(url) {
+        if (!url) return;
+        // simulate a subtle 'pop' feel without heavy changes
+        const fakePop = document.createElement('div');
+        fakePop.style.position = 'fixed';
+        fakePop.style.top = '50%';
+        fakePop.style.left = '50%';
+        fakePop.style.width = '80px';
+        fakePop.style.height = '80px';
+        fakePop.style.background = 'radial-gradient(circle, rgba(214,182,86,0.4), transparent)';
+        fakePop.style.borderRadius = '50%';
+        fakePop.style.transform = 'translate(-50%, -50%) scale(0)';
+        fakePop.style.pointerEvents = 'none';
+        fakePop.style.zIndex = '9999';
+        fakePop.style.transition = 'transform 0.18s ease-out, opacity 0.2s';
+        fakePop.style.opacity = '0.7';
+        document.body.appendChild(fakePop);
+        requestAnimationFrame(() => {
+            fakePop.style.transform = 'translate(-50%, -50%) scale(4)';
+            fakePop.style.opacity = '0';
+        });
+        setTimeout(() => {
+            fakePop.remove();
+            window.location.href = url;
+        }, 120);
+    }
+
+    // attach click listeners to cards
+    cards.forEach(card => {
+        card.addEventListener('click', (e) => {
+            // avoid double trigger if button inside is clicked
+            if (e.target.closest('.play-button')) return;
+            const btn = card.querySelector('.play-button');
+            if (btn && btn.getAttribute('href')) {
+                e.preventDefault();
+                navigateToGame(btn.getAttribute('href'));
+            }
+        });
+    });
+
+    // attach to each play button (prevent bubbling)
+    playBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const href = btn.getAttribute('href');
+            if (href) navigateToGame(href);
+        });
+    });
+
+    // console treat (easter egg)
+    console.log("%c✨ Playful Prestige ✨", "font-family: 'Poppins', system-ui; font-size: 18px; background: #1F2A44; color: #FFE599; padding: 6px 14px; border-radius: 40px;");
+    console.log("%c🎯 Clean museum soul · soft candy energy · gentle interactions 🧸", "color: #6FA8DC; font-weight: 500; font-size: 13px;");
+    
+    // create soft floating blobs (extra visual prestige)
+    function addFloatingElement() {
+        const blob = document.createElement('div');
+        blob.className = 'floating-joy';
+        const size = Math.random() * 80 + 20;
+        blob.style.width = size + 'px';
+        blob.style.height = size + 'px';
+        blob.style.left = Math.random() * 90 + '%';
+        blob.style.bottom = Math.random() * 100 + '%';
+        blob.style.animationDuration = Math.random() * 18 + 14 + 's';
+        blob.style.animationDelay = Math.random() * 8 + 's';
+        blob.style.background = `radial-gradient(circle, rgba(147,233,190,0.2), rgba(111,168,220,0.1))`;
+        document.body.appendChild(blob);
+        setTimeout(() => {
+            blob.remove();
+        }, 25000);
+    }
+    // gentle floating background to keep organic feel (few elements)
+    for (let i = 0; i < 12; i++) {
+        setTimeout(() => addFloatingElement(), i * 600);
+    }
+    setInterval(() => {
+        if (document.querySelectorAll('.floating-joy').length < 8) addFloatingElement();
+    }, 9000);
+
+    // optional micro-interaction: on button hover add soft glow
+    const allButtons = document.querySelectorAll('.play-button');
+    allButtons.forEach(btn => {
+        btn.addEventListener('mouseenter', (e) => {
+            btn.style.transition = 'all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.2)';
+        });
+    });
+
+    // dynamic year and extra charm in footer (already set but consistency)
+    const footerPara = document.querySelector('.footer p');
+    if (footerPara) {
+        const currentYear = new Date().getFullYear();
+        if (!footerPara.innerText.includes(currentYear)) {
+            footerPara.innerHTML = `crafted with gentle code ❀ playful prestige edition ❀ © ${currentYear} GameZone`;
+        }
+    }
+
+    // subtle mouse move parallax for cards? not overwhelming, but a tiny playful effect
+    document.querySelectorAll('.game-card').forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width - 0.5;
+            const y = (e.clientY - rect.top) / rect.height - 0.5;
+            const icon = card.querySelector('.game-icon');
+            if (icon) {
+                icon.style.transform = `translate(${x * 4}px, ${y * 4}px) rotate(${x * 3}deg)`;
+            }
+        });
+        card.addEventListener('mouseleave', () => {
+            const icon = card.querySelector('.game-icon');
+            if (icon) icon.style.transform = 'translate(0px, 0px) rotate(0deg)';
+        });
+    });
+
+    // extra: small interactive hover for coming soon box
+    const soonBox = document.querySelector('.coming-soon');
+    if (soonBox) {
+        soonBox.addEventListener('click', () => {
+            soonBox.style.transform = 'scale(0.99)';
+            setTimeout(() => { soonBox.style.transform = ''; }, 150);
+            // just a tiny delight – no actual navigation
+            const msg = document.createElement('div');
+            msg.innerText = '⭐ more joy incoming! ⭐';
+            msg.style.position = 'fixed';
+            msg.style.bottom = '20px';
+            msg.style.left = '50%';
+            msg.style.transform = 'translateX(-50%)';
+            msg.style.background = '#1F2A44';
+            msg.style.color = '#FFE599';
+            msg.style.padding = '8px 20px';
+            msg.style.borderRadius = '60px';
+            msg.style.fontSize = '0.85rem';
+            msg.style.zIndex = '999';
+            msg.style.fontWeight = '500';
+            msg.style.backdropFilter = 'blur(8px)';
+            msg.style.boxShadow = '0 6px 16px rgba(0,0,0,0.1)';
+            document.body.appendChild(msg);
+            setTimeout(() => msg.remove(), 1800);
+        });
+    }
+</script>
+</body>
+</html>
