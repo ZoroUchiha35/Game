@@ -1,1 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Workshop Hub · Inventor's Log · Blueprints · Community · Gallery</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%236B4F3A'/%3E%3Ctext x='50' y='70' font-size='58' text-anchor='middle' fill='%23E6C267' font-family='system-ui, sans-serif'%3E📘%3C/text%3E%3C/svg%3E">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: 'Inter', system-ui, 'Segoe UI', 'Poppins', -apple-system, BlinkMacSystemFont, 'Georgia', serif;
+            background: #F4EFE6;
+            min-height: 100vh;
+            padding: 2rem 1.8rem;
+            position: relative;
+            color: #3A2C24;
+        }
+
+        /* textured canvas background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100%" height="100%" filter="url(%23noise)" opacity="0.035"/></svg>');
+            background-repeat: repeat;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 20% 40%, rgba(107, 79, 58, 0.02) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* header navigation back to games */
+        .workshop-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #E1D3C2;
+        }
+
+        .back-link {
+            background: #E8DDD0;
+            padding: 0.5rem 1.2rem;
+            border-radius: 60px;
+            text-decoration: none;
+            color: #6B4F3A;
+            font-weight: 600;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            border: 1px solid #C9B194;
+        }
+
+        .back-link:hover {
+            background: #C9A34E;
+            color: #2F2A24;
+            transform: translateY(-2px);
+        }
+
+        .workshop-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            animation: gentleRise 0.6s cubic-bezier(0.2, 0.8, 0.4, 1) both;
+        }
+
+        @keyframes gentleRise {
+            0% { opacity: 0; transform: translateY(24px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .main-title {
+            font-size: 3.2rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: #6B4F3A;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.7rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .main-title .craft {
+            background: linear-gradient(135deg, #6B4F3A 0%, #8B694E 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .main-title .toy {
+            background: linear-gradient(135deg, #D97A6F 20%, #E6C267 80%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .subhead {
+            background: rgba(255, 243, 209, 0.7);
+            display: inline-block;
+            padding: 0.4rem 1.6rem;
+            border-radius: 60px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #4A5D73;
+            border: 1px solid rgba(90, 65, 45, 0.2);
+        }
+
+        /* 4-section grid */
+        .hub-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0 2.5rem;
+        }
+
+        /* card style (consistent with toy workshop) */
+        .hub-card {
+            background: #FFFFFFE8;
+            border-radius: 2rem;
+            padding: 2rem 1.5rem;
+            transition: all 0.3s cubic-bezier(0.2, 0.85, 0.4, 1);
+            border: 1px solid #DFD5C6;
+            box-shadow: 0 12px 22px -12px rgba(60, 40, 28, 0.12), inset 0 1px 0 rgba(255,255,235,0.8);
+            position: relative;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .hub-card::before {
+            content: '';
+            position: absolute;
+            inset: 8px;
+            border-radius: 1.5rem;
+            border: 1px dashed rgba(201, 163, 78, 0.25);
+            pointer-events: none;
+        }
+
+        .hub-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 24px 32px -16px rgba(75, 55, 40, 0.25);
+            border-color: #C9A34E;
+            background: #FFFCF5;
+        }
+
+        .card-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            display: inline-block;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+            transition: transform 0.2s;
+        }
+
+        .hub-card:hover .card-icon {
+            transform: scale(1.05) rotate(-2deg);
+        }
+
+        .hub-card h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #4A5D73;
+            margin-bottom: 0.5rem;
+            border-left: 4px solid #D97A6F;
+            padding-left: 0.9rem;
+            display: inline-block;
+        }
+
+        .hub-description {
+            color: #5E4B38;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin: 1rem 0 1.2rem;
+        }
+
+        .feature-list {
+            text-align: left;
+            margin: 1rem 0;
+            padding-left: 1rem;
+        }
+
+        .feature-list li {
+            list-style: none;
+            font-size: 0.8rem;
+            color: #6B4F3A;
+            margin: 0.4rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .badge-tag {
+            background: #F4EFE6;
+            padding: 0.2rem 0.8rem;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            display: inline-block;
+            border: 1px solid #D6C9B8;
+            margin-top: 0.8rem;
+        }
+
+        .explore-btn {
+            display: inline-block;
+            background: #6B4F3A;
+            padding: 0.6rem 1.5rem;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #F4EFE6;
+            text-decoration: none;
+            transition: all 0.18s linear;
+            border: none;
+            box-shadow: 0 3px 0 #3A2C24;
+            margin-top: 1rem;
+        }
+
+        .explore-btn:hover {
+            background: #C9A34E;
+            color: #2F2A24;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 0 #6B4F3A;
+        }
+
+        /* modal / detail panel style (for each section) */
+        .detail-panel {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(6px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .detail-card {
+            background: #FFFCF5;
+            max-width: 550px;
+            width: 90%;
+            border-radius: 2rem;
+            padding: 2rem;
+            border: 2px solid #C9A34E;
+            box-shadow: 0 30px 40px rgba(0,0,0,0.2);
+            position: relative;
+            animation: modalPop 0.3s ease;
+        }
+
+        @keyframes modalPop {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1.2rem;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: #6B4F3A;
+            transition: 0.2s;
+        }
+
+        .close-modal:hover {
+            color: #D97A6F;
+            transform: scale(1.1);
+        }
+
+        .detail-card h3 {
+            font-size: 1.8rem;
+            color: #4A5D73;
+            border-left: 4px solid #D97A6F;
+            padding-left: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .inventor-entry {
+            background: #F4EFE6;
+            padding: 1rem;
+            border-radius: 1rem;
+            margin: 1rem 0;
+            border-left: 3px solid #E6C267;
+        }
+
+        .blueprint-item {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+            padding: 0.8rem;
+            background: #F9F5ED;
+            border-radius: 1rem;
+        }
+
+        .community-user {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1rem 0;
+            padding: 0.6rem;
+            border-bottom: 1px solid #E1D3C2;
+        }
+
+        .gallery-thumb {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.8rem;
+            margin: 1rem 0;
+        }
+
+        .gallery-item {
+            background: #E8DDD0;
+            border-radius: 1rem;
+            padding: 1rem;
+            text-align: center;
+            font-size: 2rem;
+            transition: 0.2s;
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 2.5rem;
+            padding-top: 1rem;
+            border-top: 2px solid #E1D3C2;
+            font-size: 0.8rem;
+            color: #8B735A;
+        }
+
+        @media (max-width: 680px) {
+            body { padding: 1rem; }
+            .main-title { font-size: 2.2rem; }
+            .hub-card h2 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- top navigation: back to main collection -->
+    <div class="workshop-nav">
+        <a href="#" class="back-link" id="backToGamesBtn">← 🧸 Back to Game Collection</a>
+        <div class="title-badge" style="font-size: 0.8rem; background: #E8DDD0; padding: 0.3rem 1rem; border-radius: 50px;">
+            📘 workshop annex
+        </div>
+    </div>
+
+    <div class="workshop-header">
+        <div class="main-title">
+            <span class="craft">Workshop</span>
+            <span class="toy">Hub</span>
+            <span style="font-size: 2rem;">🔧</span>
+        </div>
+        <div class="subhead">
+            ✦ Inventor's Log · Blueprints · Community · Gallery ✦
+        </div>
+    </div>
+
+    <!-- 4 interactive cards -->
+    <div class="hub-grid">
+        <!-- Inventor's Log -->
+        <div class="hub-card" data-modal="inventor">
+            <div class="card-icon">📘⚙️</div>
+            <h2>Inventor's Log</h2>
+            <p class="hub-description">Daily sketches, failures, and eureka moments from the workshop.</p>
+            <div class="feature-list">
+                <li>📝 12 workshop notes</li>
+                <li>💡 prototype ideas</li>
+                <li>🧸 toy evolution</li>
+            </div>
+            <span class="badge-tag">✦ updated weekly ✦</span>
+            <div class="explore-btn">📖 Read the Log →</div>
+        </div>
+
+        <!-- Workshop Blueprints -->
+        <div class="hub-card" data-modal="blueprints">
+            <div class="card-icon">📐⚙️</div>
+            <h2>Blueprints</h2>
+            <p class="hub-description">Technical drawings & mechanical schematics for every toy invention.</p>
+            <div class="feature-list">
+                <li>🔧 exploded views</li>
+                <li>📏 gear ratios</li>
+                <li>🪵 material notes</li>
+            </div>
+            <span class="badge-tag">✦ 8 blueprints available ✦</span>
+            <div class="explore-btn">📐 Explore Plans →</div>
+        </div>
+
+        <!-- Toy Community -->
+        <div class="hub-card" data-modal="community">
+            <div class="card-icon">🧸💬</div>
+            <h2>Toy Community</h2>
+            <p class="hub-description">Meet fellow makers, share modifications, and showcase your creations.</p>
+            <div class="feature-list">
+                <li>👥 234 tinkerers</li>
+                <li>⭐ featured builds</li>
+                <li>🎨 workshop events</li>
+            </div>
+            <span class="badge-tag">✦ join the guild ✦</span>
+            <div class="explore-btn">🧸 Join Community →</div>
+        </div>
+
+        <!-- Gallery -->
+        <div class="hub-card" data-modal="gallery">
+            <div class="card-icon">🎨🖼️</div>
+            <h2>Gallery</h2>
+            <p class="hub-description">Visual archive of finished toys, concept art, and workshop photography.</p>
+            <div class="feature-list">
+                <li>🖌️ concept sketches</li>
+                <li>📸 finished pieces</li>
+                <li>✨ limited editions</li>
+            </div>
+            <span class="badge-tag">✦ 24 exhibits ✦</span>
+            <div class="explore-btn">🎨 View Gallery →</div>
+        </div>
+    </div>
+
+    <div class="footer-note">
+        <p>✧ every sketch, every gear, every friend — built with intention ✧</p>
+        <p style="margin-top: 0.3rem;">© 2026 Elegant Toy Workshop · Annex Hub</p>
+    </div>
+</div>
+
+<!-- MODAL: Inventor's Log Detail -->
+<div id="inventorModal" class="detail-panel">
+    <div class="detail-card">
+        <span class="close-modal">&times;</span>
+        <h3>📘 Inventor's Log</h3>
+        <div class="inventor-entry">
+            <strong>✧ log #23 · clockwork bird</strong>
+            <p style="font-size: 0.85rem; margin-top: 5px;">Refined wing flap mechanism. Used lighter spring steel — now Flappy Bird feels more responsive. Next: adding tiny brass pipes.</p>
+            <span style="font-size: 0.7rem; color: #C9A34E;">— 2 days ago</span>
+        </div>
+        <div class="inventor-entry">
+            <strong>✧ log #19 · memory tile glaze</strong>
+            <p style="font-size: 0.85rem; margin-top: 5px;">Applied a new beeswax finish to flip-flop tiles. The tactile feedback improved, players remember pairs more intuitively.</p>
+            <span style="font-size: 0.7rem; color: #C9A34E;">— 1 week ago</span>
+        </div>
+        <div class="inventor-entry">
+            <strong>✧ log #14 · ping pong paddle balance</strong>
+            <p style="font-size: 0.85rem; margin-top: 5px;">Recalibrated the AI opponent's rally prediction. Now feels like playing against a gentle but clever wooden automaton.</p>
+            <span style="font-size: 0.7rem; color: #C9A34E;">— 12 days ago</span>
+        </div>
+        <div style="margin-top: 1rem; text-align: center; font-size: 0.75rem; color: #8B735A;">📖 9 more notes in the full archive</div>
+    </div>
+</div>
+
+<!-- MODAL: Workshop Blueprints -->
+<div id="blueprintsModal" class="detail-panel">
+    <div class="detail-card">
+        <span class="close-modal">&times;</span>
+        <h3>📐 Workshop Blueprints</h3>
+        <div class="blueprint-item">
+            <span style="font-size: 2rem;">📏</span>
+            <div><strong>Flappy Bird — gear linkage V2</strong><br><span style="font-size: 0.75rem;">Exploded view of wing axle & counterweight. Spring tension: 0.3 Nm.</span></div>
+        </div>
+        <div class="blueprint-item">
+            <span style="font-size: 2rem;">🧩</span>
+            <div><strong>Memory Tile matrix</strong><br><span style="font-size: 0.75rem;">Wooden core with magnetic backing. Pair detection via subtle vibration.</span></div>
+        </div>
+        <div class="blueprint-item">
+            <span style="font-size: 2rem;">🏓</span>
+            <div><strong>Ping Pong paddle laminates</strong><br><span style="font-size: 0.75rem;">Walnut & cork hybrid grip. AI sensor placement schematic.</span></div>
+        </div>
+        <div class="blueprint-item">
+            <span style="font-size: 2rem;">⚙️</span>
+            <div><strong>Upcoming: music box puzzle</strong><br><span style="font-size: 0.75rem;">Preliminary sketches — gear train & melody drum.</span></div>
+        </div>
+        <div class="badge-tag" style="margin-top: 0.5rem;">🔧 download full blueprint pack (PDF) coming soon</div>
+    </div>
+</div>
+
+<!-- MODAL: Toy Community -->
+<div id="communityModal" class="detail-panel">
+    <div class="detail-card">
+        <span class="close-modal">&times;</span>
+        <h3>🧸 Toy Community</h3>
+        <div class="community-user">
+            <span style="font-size: 2rem;">🎨</span>
+            <div><strong>@whittle_whiz</strong><br><span style="font-size: 0.8rem;">"Modified the flappy bird with copper wings! Flies even smoother."</span><br><span style="font-size: 0.65rem;">❤️ 48 likes · 2h ago</span></div>
+        </div>
+        <div class="community-user">
+            <span style="font-size: 2rem;">🪵</span>
+            <div><strong>@memory_maker</strong><br><span style="font-size: 0.8rem;">"I painted the memory tiles with glow-in-the-dark varnish — magical!"</span><br><span style="font-size: 0.65rem;">❤️ 32 likes · yesterday</span></div>
+        </div>
+        <div class="community-user">
+            <span style="font-size: 2rem;">🏓</span>
+            <div><strong>@rally_robot</strong><br><span style="font-size: 0.8rem;">"Hosting a ping pong tournament this weekend in the workshop server!"</span><br><span style="font-size: 0.65rem;">❤️ 67 likes · 3d ago</span></div>
+        </div>
+        <div style="margin-top: 1rem; background: #F4EFE6; border-radius: 2rem; padding: 0.6rem; text-align: center; font-size: 0.8rem;">
+            ✨ Join the conversation — share your own toy inventions ✨
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Gallery -->
+<div id="galleryModal" class="detail-panel">
+    <div class="detail-card">
+        <span class="close-modal">&times;</span>
+        <h3>🎨 Gallery · Toy Atelier</h3>
+        <div class="gallery-thumb">
+            <div class="gallery-item">🐦✨<br><span style="font-size: 0.6rem;">Clockwork Bird</span></div>
+            <div class="gallery-item">🧩🎨<br><span style="font-size: 0.6rem;">Memory Tile Set</span></div>
+            <div class="gallery-item">🏓🪵<br><span style="font-size: 0.6rem;">Walnut Paddle</span></div>
+            <div class="gallery-item">⚙️📦<br><span style="font-size: 0.6rem;">Gear Prototype</span></div>
+            <div class="gallery-item">🧸🖌️<br><span style="font-size: 0.6rem;">Concept Sketches</span></div>
+            <div class="gallery-item">🔧🌟<br><span style="font-size: 0.6rem;">Limited Edition Badge</span></div>
+        </div>
+        <p style="text-align: center; margin-top: 0.8rem; font-size: 0.75rem;">📸 18 more artifacts — exhibitions rotate monthly</p>
+        <div class="badge-tag" style="margin-top: 0.8rem; text-align: center;">🎟️ virtual workshop tour available</div>
+    </div>
+</div>
+
+<script>
+    // --------------------------------------------------------------
+    // WORKSHOP HUB: modal system for each section (inventor/blueprint/community/gallery)
+    // + navigation back to main game collection
+    // --------------------------------------------------------------
+
+    // get all card triggers
+    const inventorCard = document.querySelector('[data-modal="inventor"]');
+    const blueprintCard = document.querySelector('[data-modal="blueprints"]');
+    const communityCard = document.querySelector('[data-modal="community"]');
+    const galleryCard = document.querySelector('[data-modal="gallery"]');
+
+    const inventorModal = document.getElementById('inventorModal');
+    const blueprintModal = document.getElementById('blueprintsModal');
+    const communityModal = document.getElementById('communityModal');
+    const galleryModal = document.getElementById('galleryModal');
+
+    const closeButtons = document.querySelectorAll('.close-modal');
+    const backBtn = document.getElementById('backToGamesBtn');
+
+    // open modals with gentle workshop feeling
+    function openModal(modal) {
+        if (modal) modal.style.display = 'flex';
+    }
+
+    function closeModal(modal) {
+        if (modal) modal.style.display = 'none';
+    }
+
+    inventorCard?.addEventListener('click', () => openModal(inventorModal));
+    blueprintCard?.addEventListener('click', () => openModal(blueprintModal));
+    communityCard?.addEventListener('click', () => openModal(communityModal));
+    galleryCard?.addEventListener('click', () => openModal(galleryModal));
+
+    closeButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            inventorModal.style.display = 'none';
+            blueprintModal.style.display = 'none';
+            communityModal.style.display = 'none';
+            galleryModal.style.display = 'none';
+        });
+    });
+
+    // close modal when clicking outside content
+    window.addEventListener('click', (e) => {
+        if (e.target === inventorModal) inventorModal.style.display = 'none';
+        if (e.target === blueprintModal) blueprintModal.style.display = 'none';
+        if (e.target === communityModal) communityModal.style.display = 'none';
+        if (e.target === galleryModal) galleryModal.style.display = 'none';
+    });
+
+    // navigation back to main game collection (index.html)
+    backBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        // simulate a soft toy-like transition message then redirect
+        const toast = document.createElement('div');
+        toast.innerText = '🧸 returning to workshop games ...';
+        toast.style.position = 'fixed';
+        toast.style.bottom = '30px';
+        toast.style.left = '50%';
+        toast.style.transform = 'translateX(-50%)';
+        toast.style.backgroundColor = '#6B4F3A';
+        toast.style.color = '#FFEEDD';
+        toast.style.padding = '8px 20px';
+        toast.style.borderRadius = '60px';
+        toast.style.fontSize = '0.8rem';
+        toast.style.zIndex = '9999';
+        toast.style.fontFamily = 'monospace';
+        toast.style.border = '1px solid #E6C267';
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            toast.remove();
+            window.location.href = 'index.html';
+        }, 500);
+    });
+
+    // floating workshop particles (same as original workshop style)
+    function createWorkshopFloater() {
+        const icons = ['⚙️', '⭐', '🪵', '🎀', '🔧', '🧸', '📘', '📐'];
+        const el = document.createElement('div');
+        el.className = 'gear-particle';
+        const randomIcon = icons[Math.floor(Math.random() * icons.length)];
+        el.innerText = randomIcon;
+        const size = Math.random() * 20 + 14;
+        el.style.fontSize = size + 'px';
+        el.style.left = Math.random() * 90 + '%';
+        el.style.top = Math.random() * 100 + '%';
+        el.style.opacity = Math.random() * 0.2 + 0.07;
+        el.style.animationDuration = Math.random() * 30 + 20 + 's';
+        el.style.animationDelay = Math.random() * 15 + 's';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 30000);
+    }
+
+    for (let i = 0; i < 16; i++) setTimeout(createWorkshopFloater, i * 450);
+    setInterval(() => {
+        if (document.querySelectorAll('.gear-particle').length < 14) createWorkshopFloater();
+    }, 7000);
+
+    // console charm
+    console.log("%c📘 Workshop Hub · Inventor's Log | Blueprints | Community | Gallery", "background: #6B4F3A; color: #FFEEDD; padding: 4px 12px; border-radius: 30px;");
+    console.log("%c✧ every sketch holds a story ✧", "color: #D97A6F; font-style: italic;");
+
+    // extra style for floating elements
+    const style = document.createElement('style');
+    style.textContent = `
+        .gear-particle {
+            position: fixed;
+            font-size: 1.2rem;
+            opacity: 0.2;
+            pointer-events: none;
+            z-index: 1;
+            user-select: none;
+            animation: slowSpin 40s infinite linear;
+        }
+        @keyframes slowSpin {
+            from { transform: rotate(0deg) translateX(0px); }
+            to { transform: rotate(360deg) translateX(8px); }
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+</body>
+</html>
