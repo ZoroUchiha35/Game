@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sky Blade — Open World Flyer</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000;overflow:hidden;font-family:'Courier New',monospace}
+#c{display:block;position:fixed;inset:0}
+
+/* HUD root */
+#hud{position:fixed;inset:0;pointer-events:none;z-index:10}
+
+/* ── Score (top centre) ── */
+#score-wrap{position:absolute;top:18px;left:50%;transform:translateX(-50%);text-align:center;background:rgba(0,8,24,0.72);border:1px solid rgba(0,255,204,0.18);padding:8px 28px;border-radius:6px}
+.sc-lbl{font-size:9px;letter-spacing:3px;color:rgba(0,255,204,0.4);margin-bottom:2px}
+.sc-num{font-size:32px;font-weight:900;color:#00ffcc;letter-spacing:5px;text-shadow:0 0 14px #00ffcc}
+
+/* ── Left panel (flight data) ── */
+#flight-panel{position:absolute;top:18px;left:18px;background:rgba(0,8,24,0.78);border:1px solid rgba(0,255,204,0.18);padding:12px 16px;border-radius:6px;min-width:150px}
+.fp-row{display:flex;justify-content:space-between;align-items:baseline;gap:14px;margin-bottom:7px}
+.fp-row:last-child{margin-bottom:0}
+.fp-lbl{font-size:9px;letter-spacing:2px;color:rgba(0,255,204,0.4)}
+.fp-val{font-size:14px;font-weight:bold;color:#00ffee;text-shadow:0 0 6px rgba(0,255,204,.5)}
+#boost-ind{display:inline-block;font-size:9px;letter-spacing:2px;color:#ff8800;text-shadow:0 0 8px #ff6600;opacity:0;transition:opacity .15s;margin-left:4px}
+
+/* ── Right panel (coins) ── */
+#coin-panel{position:absolute;top:18px;right:18px;background:rgba(0,8,24,0.78);border:1px solid rgba(255,200,0,0.18);padding:12px 16px;border-radius:6px;min-width:150px;text-align:right}
+.cp-lbl{font-size:9px;letter-spacing:2px;color:rgba(255,200,0,0.4);margin-bottom:2px}
+.cp-total{font-size:22px;font-weight:bold;color:#ffdd00;text-shadow:0 0 10px rgba(255,200,0,.5);margin-bottom:8px}
+.coin-rows{display:flex;flex-direction:column;gap:5px}
+.cr{display:flex;justify-content:flex-end;align-items:center;gap:8px;font-size:11px}
+.cr-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
+.cr-val{font-weight:bold;min-width:28px;text-align:right}
+.cr-lbl{font-size:9px;letter-spacing:1px}
+.bronze{color:#ff8822}.bronze .cr-dot{background:#ff8822;box-shadow:0 0 4px #ff6600}
+.silver{color:#aabbff}.silver .cr-dot{background:#aabbff;box-shadow:0 0 4px #8899ff}
+.gold{color:#ffdd00}.gold .cr-dot{background:#ffdd00;box-shadow:0 0 4px #ffaa00}
+
+/* ── Minimap (bottom right) ── */
+#mm-wrap{position:absolute;bottom:18px;right:18px}
+#mm{border-radius:50%;display:block;border:1px solid rgba(0,255,204,0.3)}
+.mm-label{font-size:9px;letter-spacing:2px;color:rgba(0,255,204,0.3);text-align:center;margin-top:5px}
+
+/* ── Controls (bottom left) ── */
+#ctrl-hint{position:absolute;bottom:18px;left:18px;background:rgba(0,8,24,0.72);border:1px solid rgba(0,255,204,0.12);padding:10px 14px;border-radius:6px;line-height:2;font-size:10px;color:rgba(0,255,204,0.38);letter-spacing:1px}
+.k{display:inline-block;background:rgba(0,255,204,0.07);border:1px solid rgba(0,255,204,0.22);padding:0 5px;border-radius:2px;color:rgba(0,255,204,0.6);font-size:10px;margin-right:3px}
+
+/* ── Collect flash ── */
+#flash{position:fixed;inset:0;pointer-events:none;z-index:9;background:transparent;transition:background .12s}
+
+/* ── Popup text ── */
+#popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-60px);font-size:22px;font-weight:900;letter-spacing:3px;pointer-events:none;z-index:12;opacity:0;transition:opacity .15s;text-shadow:0 0 12px currentColor}
+
+/* ── Screen overlay ── */
+#screen{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,4,20,0.93);text-align:center;transition:opacity .3s}
+#screen.hidden{opacity:0;pointer-events:none}
+.st{font-size:clamp(42px,8vw,96px);font-weight:900;letter-spacing:10px;color:#00ffcc;text-shadow:0 0 40px #00ffcc,0 0 100px rgba(0,150,255,.3);margin-bottom:6px}
+.ss{font-size:11px;letter-spacing:5px;color:rgba(0,255,204,0.35);margin-bottom:52px}
+.grid2{display:grid;grid-template-columns:auto 1fr;gap:8px 22px;font-size:12px;letter-spacing:1px;margin-bottom:52px;text-align:left}
+.gk{font-family:'Courier New',monospace;background:rgba(0,255,204,0.08);border:1px solid rgba(0,255,204,0.22);padding:3px 10px;border-radius:3px;color:#00ffcc;text-align:center}
+.gd{color:rgba(255,255,255,0.55);display:flex;align-items:center}
+.btn{background:transparent;border:1px solid #00ffcc;color:#00ffcc;padding:13px 56px;font-size:13px;letter-spacing:5px;font-family:'Courier New',monospace;cursor:pointer;pointer-events:all;transition:all .25s}
+.btn:hover{background:rgba(0,255,204,0.08);box-shadow:0 0 30px rgba(0,255,204,.25);letter-spacing:6px}
+#s-pause{display:none}
+.pause-title{font-size:40px;font-weight:900;letter-spacing:8px;color:#00ffcc;text-shadow:0 0 20px #00ffcc;margin-bottom:8px}
+.pause-sub{font-size:10px;letter-spacing:3px;color:rgba(0,255,204,.3);margin-bottom:40px}
+
+/* scanline */
+.sl{position:fixed;inset:0;pointer-events:none;z-index:999;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.015) 3px,rgba(0,0,0,.015) 4px)}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="flash"></div>
+<div id="popup"></div>
+
+<!-- HUD -->
+<div id="hud">
+  <div id="score-wrap">
+    <div class="sc-lbl">SCORE</div>
+    <div class="sc-num" id="h-score">0000000</div>
+  </div>
+
+  <div id="flight-panel">
+    <div class="fp-row"><span class="fp-lbl">ALTITUDE</span><span class="fp-val" id="h-alt">25m</span></div>
+    <div class="fp-row"><span class="fp-lbl">SPEED</span><span class="fp-val" id="h-spd">120 kn<span id="boost-ind">⚡ BOOST</span></span></div>
+    <div class="fp-row"><span class="fp-lbl">HEADING</span><span class="fp-val" id="h-dir">N</span></div>
+    <div class="fp-row"><span class="fp-lbl">LIVES</span><span class="fp-val" id="h-lives" style="color:#ff4444;text-shadow:0 0 8px #ff4444">❤ 3</span></div>
+  </div>
+
+  <div id="coin-panel">
+    <div class="cp-lbl">COINS COLLECTED</div>
+    <div class="cp-total" id="cp-total">0</div>
+    <div class="coin-rows">
+      <div class="cr gold"><span class="cr-lbl">GOLD ×25</span><span class="cr-val" id="cb-g">0</span><span class="cr-dot"></span></div>
+      <div class="cr silver"><span class="cr-lbl">SILVER ×5</span><span class="cr-val" id="cb-s">0</span><span class="cr-dot"></span></div>
+      <div class="cr bronze"><span class="cr-lbl">BRONZE ×1</span><span class="cr-val" id="cb-b">0</span><span class="cr-dot"></span></div>
+    </div>
+  </div>
+
+  <div id="mm-wrap">
+    <canvas id="mm" width="160" height="160"></canvas>
+    <div class="mm-label">RADAR</div>
+  </div>
+
+  <div id="ctrl-hint">
+    <span class="k">W</span>Forward &nbsp;<span class="k">S</span>Back<br>
+    <span class="k">A</span><span class="k">D</span>Turn &nbsp;<span class="k">SPC</span>Climb<br>
+    <span class="k">C</span>Dive &nbsp;<span class="k">SHIFT</span>Boost<br>
+    <span class="k">ESC</span>Pause
+  </div>
+</div>
+
+<!-- Screen overlay -->
+<div id="screen">
+  <div id="s-start">
+    <div class="st">SKY BLADE</div>
+    <div class="ss">OPEN WORLD FLYER</div>
+    <div class="grid2">
+      <div class="gk">W / S</div><div class="gd">Fly forward / backward</div>
+      <div class="gk">A / D</div><div class="gd">Turn left / right</div>
+      <div class="gk">SPACE</div><div class="gd">Climb</div>
+      <div class="gk">C</div><div class="gd">Dive</div>
+      <div class="gk">SHIFT</div><div class="gd">Afterburner boost</div>
+      <div class="gk">ESC</div><div class="gd">Pause</div>
+    </div>
+    <button class="btn" onclick="startGame()">FLY</button>
+  </div>
+  <div id="s-pause">
+    <div class="pause-title">PAUSED</div>
+    <div class="pause-sub">MISSION SUSPENDED</div>
+    <button class="btn" onclick="resumeGame()">RESUME</button>
+  </div>
+  <div id="s-gameover">
+    <div class="st" style="color:#ff4444;text-shadow:0 0 40px #ff4444">MISSION FAILED</div>
+    <div class="ss">ALL SYSTEMS DOWN</div>
+    <div class="grid2">
+      <div class="gk" style="color:#ffdd00">SCORE</div><div class="gd" style="color:#ffdd00;font-weight:bold;font-size:18px" id="go-score">0000000</div>
+      <div class="gk" style="color:#00ffcc">HIGH SCORE</div><div class="gd" style="color:#00ffcc;font-weight:bold;font-size:18px" id="go-high">0000000</div>
+    </div>
+    <button class="btn" onclick="startGame()">RETRY</button>
+  </div>
+</div>
+
+<div class="sl"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+'use strict';
+
+// ════════════════════════════════════════════
+//  CONFIG
+// ════════════════════════════════════════════
+const CFG = {
+  CHUNK:    90,    // world units per chunk
+  RDIST:    2,     // render distance (chunks)
+  B_MIN:    5,     // min buildings/chunk
+  B_MAX:    9,     // max buildings/chunk
+  B_GAP:    9,     // min gap between buildings
+  COINS:    5,     // coins per chunk
+  SPEED:    0.48,  // base speed (units/frame @60fps)
+  BOOST:    2.1,   // boost multiplier
+  CAM_D:    20,    // camera distance behind
+  CAM_H:    8,     // camera height above
+  CAM_L:    0.07,  // camera lerp
+  COIN_R:   5.5,   // collection radius
+  MIN_Y:    3.5,
+  MAX_Y:    220,
+};
+
+// ════════════════════════════════════════════
+//  RENDERER / SCENE
+// ════════════════════════════════════════════
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x000a1a, 0.0065);
+scene.background = new THREE.Color(0x000a1a);
+
+const camera = new THREE.PerspectiveCamera(65, innerWidth / innerHeight, 0.5, 600);
+scene.add(camera);
+
+window.addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+// ════════════════════════════════════════════
+//  LIGHTS
+// ════════════════════════════════════════════
+scene.add(new THREE.AmbientLight(0x0c1a30, 2.2));
+const dirL = new THREE.DirectionalLight(0x1a4488, 0.9);
+dirL.position.set(1, 2, 0.5);
+scene.add(dirL);
+scene.add(new THREE.HemisphereLight(0x001133, 0x000508, 0.7));
+
+// ════════════════════════════════════════════
+//  STARS
+// ════════════════════════════════════════════
+{
+  const v = [];
+  for (let i = 0; i < 5000; i++) {
+    const t = Math.random() * Math.PI * 2;
+    const p = Math.acos(2 * Math.random() - 1);
+    const r = 350 + Math.random() * 150;
+    v.push(r * Math.sin(p) * Math.cos(t), Math.abs(r * Math.cos(p)) + 15, r * Math.sin(p) * Math.sin(t));
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(v, 3));
+  scene.add(new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.28 })));
+}
+
+// Moon
+{
+  const moon = new THREE.Mesh(new THREE.SphereGeometry(18, 16, 16), new THREE.MeshBasicMaterial({ color: 0xddeeff }));
+  moon.position.set(-250, 200, -350);
+  scene.add(moon);
+  const corona = new THREE.Mesh(new THREE.SphereGeometry(22, 16, 16), new THREE.MeshBasicMaterial({ color: 0x334455, transparent: true, opacity: 0.25, side: THREE.BackSide }));
+  moon.add(corona);
+}
+
+// ════════════════════════════════════════════
+//  GROUND (follows player, always underfoot)
+// ════════════════════════════════════════════
+const groundMesh = new THREE.Mesh(
+  new THREE.PlaneGeometry(3500, 3500),
+  new THREE.MeshStandardMaterial({ color: 0x040c1a, roughness: 1 })
+);
+groundMesh.rotation.x = -Math.PI / 2;
+groundMesh.position.y = -0.5;
+scene.add(groundMesh);
+
+const gridHelper = new THREE.GridHelper(3500, 220, 0x081833, 0x081833);
+gridHelper.position.y = -0.42;
+scene.add(gridHelper);
+
+// ════════════════════════════════════════════
+//  WINDOW TEXTURES
+// ════════════════════════════════════════════
+const NEONS = [0x00ffcc, 0xff00aa, 0x00aaff, 0xffaa00, 0xff2255, 0x44ffaa, 0xaa44ff, 0xff6622, 0x22ffdd, 0xee44ff];
+const WIN_TEX = [];
+
+for (let t = 0; t < 10; t++) {
+  const cv = document.createElement('canvas');
+  cv.width = 64; cv.height = 128;
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, 64, 128);
+  const nc = NEONS[t % NEONS.length];
+  const hex = '#' + nc.toString(16).padStart(6, '0');
+  for (let r = 0; r < 16; r++) for (let col = 0; col < 4; col++) {
+    if (Math.random() > 0.28) {
+      ctx.fillStyle = Math.random() > 0.82 ? '#ffcc66' : hex;
+      ctx.globalAlpha = 0.45 + Math.random() * 0.55;
+      ctx.fillRect(col * 16 + 2, r * 8 + 2, 12, 5);
+    }
+  }
+  WIN_TEX.push({ tex: new THREE.CanvasTexture(cv), nc });
+}
+
+// ════════════════════════════════════════════
+//  BUILDING FACTORY
+// ════════════════════════════════════════════
+const B_COLORS = [0x0b1945, 0x081828, 0x0d2b1e, 0x1a0d32, 0x1f0a1a, 0x0a1c2e, 0x111830, 0x0a1520];
+
+function mkBuilding(w, h, d, wx, wy, wz) {
+  const wt = WIN_TEX[Math.floor(Math.random() * WIN_TEX.length)];
+  const mesh = new THREE.Mesh(
+    new THREE.BoxGeometry(w, h, d),
+    new THREE.MeshStandardMaterial({
+      color: B_COLORS[Math.floor(Math.random() * B_COLORS.length)],
+      emissive: new THREE.Color(wt.nc),
+      emissiveMap: wt.tex,
+      emissiveIntensity: 0.28 + Math.random() * 0.15,
+      roughness: 0.85, metalness: 0.2,
+    })
+  );
+  mesh.position.set(wx, wy, wz);
+
+  if (Math.random() > 0.25) {
+    const bea = new THREE.Mesh(new THREE.SphereGeometry(0.38, 6, 6), new THREE.MeshBasicMaterial({ color: wt.nc }));
+    bea.position.y = h / 2 + 0.5;
+    mesh.add(bea);
+  }
+  if (Math.random() > 0.45) {
+    const ant = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, h * 0.13, 4), new THREE.MeshBasicMaterial({ color: 0x223344 }));
+    ant.position.y = h / 2 + h * 0.065;
+    mesh.add(ant);
+  }
+  return mesh;
+}
+
+// ════════════════════════════════════════════
+//  COIN TYPES & FACTORY
+// ════════════════════════════════════════════
+const COIN_DEF = [
+  { label: 'bronze', color: 0xff7722, value: 1,  size: 0.55, chance: 0.60 },
+  { label: 'silver', color: 0x99bbff, value: 5,  size: 0.78, chance: 0.90 },
+  { label: 'gold',   color: 0xffdd00, value: 25, size: 1.1,  chance: 1.00 },
+];
+
+function pickCoinType() {
+  const r = Math.random();
+  return COIN_DEF.find(d => r < d.chance);
+}
+
+function mkCoin(def, wx, wy, wz) {
+  const g = new THREE.Group();
+  // Ring
+  g.add(new THREE.Mesh(
+    new THREE.TorusGeometry(def.size, def.size * 0.28, 8, 22),
+    new THREE.MeshBasicMaterial({ color: def.color })
+  ));
+  // Face disc
+  g.add(new THREE.Mesh(
+    new THREE.CircleGeometry(def.size * 0.6, 6),
+    new THREE.MeshBasicMaterial({ color: def.color, side: THREE.DoubleSide, transparent: true, opacity: 0.4 })
+  ));
+  // Glow halo
+  g.add(new THREE.Mesh(
+    new THREE.SphereGeometry(def.size * 2.0, 8, 8),
+    new THREE.MeshBasicMaterial({ color: def.color, transparent: true, opacity: 0.055, side: THREE.BackSide })
+  ));
+  g.position.set(wx, wy, wz);
+  return g;
+}
+
+// ════════════════════════════════════════════
+//  CHUNK SYSTEM
+// ════════════════════════════════════════════
+const chunks = new Map();
+
+function chunkCoord(w) { return Math.floor(w / CFG.CHUNK); }
+
+function genChunk(cx, cz) {
+  const key = `${cx},${cz}`;
+  if (chunks.has(key)) return;
+
+  const group = new THREE.Group();
+  scene.add(group);
+
+  const buildings = [], coins = [];
+  const placed = []; // { x, z, hw, hd }
+
+  const ox = cx * CFG.CHUNK, oz = cz * CFG.CHUNK;
+  const numB = CFG.B_MIN + Math.floor(Math.random() * (CFG.B_MAX - CFG.B_MIN + 1));
+
+  for (let att = 0, cnt = 0; att < 50 && cnt < numB; att++) {
+    const lx = (Math.random() - 0.5) * CFG.CHUNK * 0.86;
+    const lz = (Math.random() - 0.5) * CFG.CHUNK * 0.86;
+    const w = 4 + Math.random() * 16;
+    const d = 4 + Math.random() * 16;
+    const hw = w / 2, hd = d / 2;
+
+    let ok = true;
+    for (const p of placed) {
+      if (Math.abs(lx - p.x) < hw + p.hw + CFG.B_GAP && Math.abs(lz - p.z) < hd + p.hd + CFG.B_GAP) { ok = false; break; }
+    }
+    if (!ok) continue;
+
+    placed.push({ x: lx, z: lz, hw, hd });
+    cnt++;
+
+    const h = 8 + Math.random() * 62;
+    const wx = ox + lx, wz = oz + lz, wy = h / 2 - 0.5;
+    const mesh = mkBuilding(w, h, d, wx, wy, wz);
+    group.add(mesh);
+    buildings.push({ mesh, wx, wz, hw, hd, h });
+  }
+
+  // Coins at varying heights — sometimes peek inside building crevices
+  for (let i = 0; i < CFG.COINS; i++) {
+    const lx = (Math.random() - 0.5) * CFG.CHUNK * 0.82;
+    const lz = (Math.random() - 0.5) * CFG.CHUNK * 0.82;
+    const ly = 10 + Math.random() * 65;
+    const def = pickCoinType();
+    const mesh = mkCoin(def, ox + lx, ly, oz + lz);
+    group.add(mesh);
+    coins.push({ mesh, wx: ox + lx, wy: ly, wz: oz + lz, value: def.value, label: def.label, collected: false });
+  }
+
+  chunks.set(key, { group, buildings, coins });
+}
+
+function removeChunk(key) {
+  const ch = chunks.get(key);
+  if (!ch) return;
+  scene.remove(ch.group);
+  ch.group.traverse(o => {
+    if (o.geometry) o.geometry.dispose();
+    if (o.material) Array.isArray(o.material) ? o.material.forEach(m => m.dispose()) : o.material.dispose();
+  });
+  chunks.delete(key);
+}
+
+function updateChunks(px, pz) {
+  const pcx = chunkCoord(px), pcz = chunkCoord(pz);
+  for (let dx = -CFG.RDIST; dx <= CFG.RDIST; dx++)
+    for (let dz = -CFG.RDIST; dz <= CFG.RDIST; dz++)
+      genChunk(pcx + dx, pcz + dz);
+
+  for (const key of chunks.keys()) {
+    const [kx, kz] = key.split(',').map(Number);
+    if (Math.abs(kx - pcx) > CFG.RDIST + 1 || Math.abs(kz - pcz) > CFG.RDIST + 1) removeChunk(key);
+  }
+}
+
+// ════════════════════════════════════════════
+//  PLANE MODEL
+// ════════════════════════════════════════════
+function mkPlane() {
+  const g = new THREE.Group();
+  const steel = new THREE.MeshStandardMaterial({ color: 0xbcccdd, metalness: 0.9, roughness: 0.15 });
+  const dark  = new THREE.MeshStandardMaterial({ color: 0x1e3248, metalness: 0.7, roughness: 0.4 });
+  const glass = new THREE.MeshStandardMaterial({ color: 0x55aaff, transparent: true, opacity: 0.7, metalness: 0.4 });
+
+  // Fuselage
+  g.add(new THREE.Mesh(new THREE.BoxGeometry(0.92, 0.64, 4.8), steel));
+  // Nose
+  const nose = new THREE.Mesh(new THREE.ConeGeometry(0.34, 1.4, 8), steel);
+  nose.rotation.x = Math.PI / 2; nose.position.z = -3.1;
+  g.add(nose);
+  // Cockpit
+  const ck = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.36, 0.96), glass);
+  ck.position.set(0, 0.44, -0.3);
+  g.add(ck);
+  // Main wings
+  const mw = new THREE.Mesh(new THREE.BoxGeometry(9, 0.1, 1.9), dark);
+  mw.position.z = 0.5;
+  g.add(mw);
+  // Swept leading edge
+  const sw = new THREE.Mesh(new THREE.BoxGeometry(7, 0.07, 0.35), steel);
+  sw.position.set(0, 0.04, -0.4); sw.rotation.y = 0.1;
+  g.add(sw);
+  // Tail
+  const tw = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.09, 1.1), dark);
+  tw.position.z = 2.1;
+  g.add(tw);
+  // Vertical stabiliser
+  const vs = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.92, 0.95), dark);
+  vs.position.set(0, 0.55, 2.05);
+  g.add(vs);
+  // Engine pods
+  const flames = [];
+  [[-1.75, 0.6], [1.75, 0.6]].forEach(([ex, ez]) => {
+    const pod = new THREE.Mesh(new THREE.CylinderGeometry(0.21, 0.26, 1.2, 8), dark);
+    pod.rotation.x = Math.PI / 2; pod.position.set(ex, -0.22, ez);
+    g.add(pod);
+    const fl = new THREE.Mesh(new THREE.ConeGeometry(0.17, 0.75, 8), new THREE.MeshBasicMaterial({ color: 0x0088ff }));
+    fl.rotation.x = -Math.PI / 2; fl.position.set(ex, -0.22, ez + 1.0);
+    g.add(fl);
+    flames.push(fl);
+  });
+  g._flames = flames;
+  // Wing tip lights
+  [[-4.6, 0xff2244], [4.6, 0x00ff66]].forEach(([x, col]) => {
+    const tip = new THREE.Mesh(new THREE.SphereGeometry(0.13, 6, 6), new THREE.MeshBasicMaterial({ color: col }));
+    tip.position.set(x, 0, 0.5);
+    g.add(tip);
+  });
+
+  scene.add(g);
+  return g;
+}
+
+const plane = mkPlane();
+
+// ════════════════════════════════════════════
+//  EXHAUST PARTICLES
+// ════════════════════════════════════════════
+const exhaust = [];
+for (let i = 0; i < 40; i++) {
+  const m = new THREE.Mesh(new THREE.SphereGeometry(0.14, 4, 4), new THREE.MeshBasicMaterial({ color: 0x0066ff, transparent: true }));
+  m.visible = false;
+  scene.add(m);
+  exhaust.push({ mesh: m, life: 0, maxLife: 0 });
+}
+let exIdx = 0;
+function spawnExhaust(boosting) {
+  const p = exhaust[exIdx % exhaust.length]; exIdx++;
+  p.mesh.position.set(
+    plane.position.x + (Math.random() - 0.5) * 0.35,
+    plane.position.y - 0.2 + (Math.random() - 0.5) * 0.2,
+    plane.position.z + Math.sin(heading) * 3.2
+  );
+  const sinH = Math.sin(heading), cosH = Math.cos(heading);
+  p.vx = sinH * 0.18; p.vz = cosH * 0.18;
+  p.mesh.material.color.set(boosting ? 0xff6600 : 0x0066ff);
+  p.mesh.material.opacity = boosting ? 0.85 : 0.6;
+  p.mesh.scale.setScalar(boosting ? 1.8 : 1);
+  p.mesh.visible = true;
+  p.life = p.maxLife = boosting ? 16 : 11;
+}
+
+// ════════════════════════════════════════════
+//  GAME STATE
+// ════════════════════════════════════════════
+let state = 'start';
+let heading = 0;
+let score = 0;
+let lives = 3;
+let highScore = 0;
+let lastCollisionTime = 0;
+let shakeIntensity = 30;
+let shakeDuration = 0;
+let coinCounts = { bronze: 0, silver: 0, gold: 0 };
+const playerPos = new THREE.Vector3(0, 25, 0);
+const camPos    = new THREE.Vector3(0, 33, 20);
+let tiltZ = 0, tiltX = 0;
+let frame = 0;
+let lastT = performance.now();
+
+const keys = {};
+window.addEventListener('keydown', e => {
+  keys[e.code] = true;
+  if (state === 'start' && (e.code === 'Space' || e.code === 'Enter' || e.code === 'KeyF')) startGame();
+  if (state === 'playing' && e.code === 'Escape') pauseGame();
+  if (state === 'paused' && e.code === 'Escape') resumeGame();
+  if (state === 'gameover' && (e.code === 'Space' || e.code === 'Enter' || e.code === 'KeyF')) startGame();
+  if (['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)) e.preventDefault();
+});
+window.addEventListener('keyup', e => { keys[e.code] = false; });
+
+// ════════════════════════════════════════════
+//  GAME CONTROL
+// ════════════════════════════════════════════
+function startGame() {
+  state = 'playing';
+  score = 0; 
+  lives = 3;
+  coinCounts = { bronze: 0, silver: 0, gold: 0 };
+  heading = 0;
+  playerPos.set(0, 25, 0);
+  camPos.set(0, 33, 20);
+  tiltZ = 0; tiltX = 0;
+  lastCollisionTime = 0;
+  for (const k of chunks.keys()) removeChunk(k);
+  updateChunks(0, 0);
+  updateHUD();
+  hideScreen();
+}
+function pauseGame()  { state = 'paused'; showSub('s-pause'); }
+function resumeGame() { state = 'playing'; hideScreen(); }
+function endGame() {
+  if (score > highScore) highScore = score;
+  state = 'gameover';
+  g('go-score').textContent = String(score).padStart(7, '0');
+  g('go-high').textContent = String(highScore).padStart(7, '0');
+  showSub('s-gameover');
+}
+
+// ════════════════════════════════════════════
+//  UPDATE
+// ════════════════════════════════════════════
+function update(dt) {
+  if (state !== 'playing') return;
+  frame++;
+
+  const boost = keys['ShiftLeft'] || keys['ShiftRight'];
+  const spd = CFG.SPEED * (boost ? CFG.BOOST : 1) * 60 * dt;
+
+  // Yaw
+  const tr = 0.036 * (boost ? 0.72 : 1);
+  if (keys['KeyA'] || keys['ArrowLeft'])  heading += tr;
+  if (keys['KeyD'] || keys['ArrowRight']) heading -= tr;
+
+  // Movement in heading direction
+  const sinH = Math.sin(heading), cosH = Math.cos(heading);
+  if (keys['KeyW'] || keys['ArrowUp']) {
+    playerPos.x -= sinH * spd;
+    playerPos.z -= cosH * spd;
+  }
+  if (keys['KeyS'] || keys['ArrowDown']) {
+    playerPos.x += sinH * spd * 0.6;
+    playerPos.z += cosH * spd * 0.6;
+  }
+
+  // Altitude
+  const vs = spd * 0.52;
+  if (keys['Space'] || keys['KeyQ']) playerPos.y = Math.min(CFG.MAX_Y, playerPos.y + vs);
+  if (keys['KeyC'] || keys['KeyE'])  playerPos.y = Math.max(CFG.MIN_Y, playerPos.y - vs);
+
+  // Bank & pitch
+  const wTZ = (keys['KeyA']||keys['ArrowLeft']) ? 0.45 : (keys['KeyD']||keys['ArrowRight']) ? -0.45 : 0;
+  const wTX = (keys['Space']||keys['KeyQ']) ? -0.17 : (keys['KeyC']||keys['KeyE']) ? 0.15 : 0;
+  tiltZ += (wTZ - tiltZ) * 0.12;
+  tiltX += (wTX - tiltX) * 0.1;
+
+  // Apply shake effect
+  if (shakeDuration > 0) {
+    shakeDuration--;
+    const shakeAmount = shakeIntensity * (shakeDuration / 15);
+    plane.position.copy(playerPos);
+    plane.position.x += (Math.random() - 0.5) * shakeAmount;
+    plane.position.y += (Math.random() - 0.5) * shakeAmount;
+    plane.position.z += (Math.random() - 0.5) * shakeAmount;
+    plane.rotation.set(
+      tiltX + (Math.random() - 0.5) * shakeAmount * 0.15,
+      heading + (Math.random() - 0.5) * shakeAmount * 0.1,
+      tiltZ + (Math.random() - 0.5) * shakeAmount * 0.15
+    );
+  } else {
+    plane.position.copy(playerPos);
+    plane.rotation.set(tiltX, heading, tiltZ);
+  }
+
+  if (plane._flames) {
+    const fc = boost ? 0xff7700 : 0x0088ff;
+    plane._flames.forEach(f => f.material.color.set(fc));
+  }
+
+  // Exhaust every 2 frames
+  if (frame % 2 === 0) spawnExhaust(boost);
+  exhaust.forEach(p => {
+    if (p.life <= 0) return;
+    p.life--;
+    p.mesh.position.x += p.vx;
+    p.mesh.position.z += p.vz;
+    p.mesh.material.opacity *= 0.91;
+    p.mesh.scale.multiplyScalar(0.96);
+    if (p.life === 0) p.mesh.visible = false;
+  });
+
+  // Camera — smooth lerp behind plane
+  const ideal = new THREE.Vector3(
+    playerPos.x + sinH * CFG.CAM_D,
+    playerPos.y + CFG.CAM_H - tiltX * 4,
+    playerPos.z + cosH * CFG.CAM_D
+  );
+  camPos.lerp(ideal, CFG.CAM_L);
+  camera.position.copy(camPos);
+  camera.lookAt(playerPos.x, playerPos.y - 1, playerPos.z);
+
+  // Chunks
+  updateChunks(playerPos.x, playerPos.z);
+
+  // Coin rotation + collection
+  const cr2 = CFG.COIN_R * CFG.COIN_R;
+  for (const [, ch] of chunks) {
+    for (const coin of ch.coins) {
+      if (coin.collected) continue;
+      coin.mesh.rotation.y += 0.05;
+      coin.mesh.rotation.x += 0.02;
+      const dx = playerPos.x - coin.wx;
+      const dy = playerPos.y - coin.wy;
+      const dz = playerPos.z - coin.wz;
+      if (dx*dx + dy*dy + dz*dz < cr2) collectCoin(coin);
+    }
+  }
+
+  // Building collision detection
+  const planeR = 1.5; // collision radius of plane
+  for (const [, ch] of chunks) {
+    for (const b of ch.buildings) {
+      const dx = playerPos.x - b.wx;
+      const dz = playerPos.z - b.wz;
+      const dy = playerPos.y - b.h / 2;
+      // Check 3D bounding box collision
+      if (Math.abs(dx) < b.hw + planeR && Math.abs(dz) < b.hd + planeR && Math.abs(dy) < b.h / 2 + planeR) {
+        const now = performance.now();
+        if (now - lastCollisionTime > 1000) { // Prevent multiple hits per second
+          loseLife();
+          lastCollisionTime = now;
+        }
+      }
+    }
+  }
+
+  updateHUD();
+  drawMinimap();
+}
+
+// ════════════════════════════════════════════
+//  COLLISION HANDLER
+// ════════════════════════════════════════════
+function triggerShake() {
+  shakeIntensity = 0.8;
+  shakeDuration = 15;
+}
+
+function loseLife() {
+  lives--;
+  triggerShake();
+  flashScreen(-1); // Damage flash
+  showPopup('-1 LIFE', 'damage');
+  playDamageTone();
+  updateHUD();
+  if (lives <= 0) endGame();
+}
+
+// ════════════════════════════════════════════
+//  COIN COLLECT
+// ════════════════════════════════════════════
+function collectCoin(coin) {
+  coin.collected = true;
+  coin.mesh.visible = false;
+  score += coin.value;
+  coinCounts[coin.label]++;
+  playTone(coin.value);
+  flashScreen(coin.value);
+  showPopup('+' + coin.value, coin.label);
+  updateHUD();
+}
+
+// ════════════════════════════════════════════
+//  AUDIO
+// ════════════════════════════════════════════
+let actx;
+function playTone(val) {
+  try {
+    if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = actx.createOscillator();
+    const gain = actx.createGain();
+    osc.connect(gain); gain.connect(actx.destination);
+    osc.type = 'sine';
+    const now = actx.currentTime;
+    if (val >= 25) {
+      osc.frequency.setValueAtTime(1046, now);
+      osc.frequency.linearRampToValueAtTime(1568, now + 0.18);
+    } else if (val >= 5) {
+      osc.frequency.value = 784;
+    } else {
+      osc.frequency.value = 523;
+    }
+    gain.gain.setValueAtTime(0.12, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+    osc.start(now); osc.stop(now + 0.38);
+  } catch (e) {}
+}
+
+function playDamageTone() {
+  try {
+    if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = actx.createOscillator();
+    const gain = actx.createGain();
+    osc.connect(gain); gain.connect(actx.destination);
+    osc.type = 'sine';
+    const now = actx.currentTime;
+    osc.frequency.setValueAtTime(220, now);
+    osc.frequency.linearRampToValueAtTime(110, now + 0.3);
+    gain.gain.setValueAtTime(0.15, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+    osc.start(now); osc.stop(now + 0.3);
+  } catch (e) {}
+}
+
+// ════════════════════════════════════════════
+//  FX
+// ════════════════════════════════════════════
+function flashScreen(val) {
+  const f = document.getElementById('flash');
+  let col;
+  if (val < 0) {
+    col = 'rgba(255,68,68,0.22)'; // Red damage flash
+  } else {
+    col = val >= 25 ? 'rgba(255,220,0,0.16)' : val >= 5 ? 'rgba(150,180,255,0.13)' : 'rgba(255,120,34,0.09)';
+  }
+  f.style.background = col;
+  setTimeout(() => { f.style.background = 'transparent'; }, 170);
+}
+
+let popTimer;
+function showPopup(text, type) {
+  const p = document.getElementById('popup');
+  p.textContent = text;
+  p.style.color = type === 'gold' ? '#ffdd00' : type === 'silver' ? '#aabbff' : type === 'damage' ? '#ff4444' : '#ff8822';
+  p.style.opacity = '1';
+  clearTimeout(popTimer);
+  popTimer = setTimeout(() => { p.style.opacity = '0'; }, 800);
+}
+
+// ════════════════════════════════════════════
+//  HUD
+// ════════════════════════════════════════════
+function g(id) { return document.getElementById(id); }
+
+function updateHUD() {
+  g('h-score').textContent = String(score).padStart(7, '0');
+  g('h-alt').textContent = Math.round(playerPos.y) + 'm';
+  const boost = keys['ShiftLeft'] || keys['ShiftRight'];
+  const kn = Math.round(CFG.SPEED * (boost ? CFG.BOOST : 1) * 200);
+  g('h-spd').innerHTML = kn + ' kn<span id="boost-ind" style="opacity:' + (boost ? 1 : 0) + ';color:#ff8800;font-size:9px;letter-spacing:2px;text-shadow:0 0 8px #ff6600;margin-left:4px"> ⚡ BOOST</span>';
+  const deg = Math.round(((heading * 180 / Math.PI) % 360 + 360) % 360);
+  g('h-dir').textContent = ['N','NE','E','SE','S','SW','W','NW'][Math.round(deg / 45) % 8] + ' ' + deg + '°';
+  const lifeColor = lives <= 1 ? '#ff4444' : lives <= 2 ? '#ff8844' : '#44ff44';
+  g('h-lives').textContent = '❤ ' + lives;
+  g('h-lives').style.color = lifeColor;
+  g('h-lives').style.textShadow = `0 0 8px ${lifeColor}`;
+  const total = coinCounts.bronze + coinCounts.silver + coinCounts.gold;
+  g('cp-total').textContent = total;
+  g('cb-b').textContent = coinCounts.bronze;
+  g('cb-s').textContent = coinCounts.silver;
+  g('cb-g').textContent = coinCounts.gold;
+}
+
+// ════════════════════════════════════════════
+//  MINIMAP
+// ════════════════════════════════════════════
+const mmC = document.getElementById('mm');
+const mmX = mmC.getContext('2d');
+const MM = 160, MM_R = 200; // pixels, world range
+
+function drawMinimap() {
+  mmX.clearRect(0, 0, MM, MM);
+  mmX.save();
+  mmX.beginPath(); mmX.arc(MM/2, MM/2, MM/2-1, 0, Math.PI*2); mmX.clip();
+
+  // BG
+  mmX.fillStyle = 'rgba(0,4,18,0.9)'; mmX.fillRect(0,0,MM,MM);
+
+  // Grid
+  const gs = CFG.CHUNK * (MM/2) / MM_R;
+  const ox = ((playerPos.x % CFG.CHUNK) / MM_R) * (MM/2);
+  const oz = ((playerPos.z % CFG.CHUNK) / MM_R) * (MM/2);
+  mmX.strokeStyle = 'rgba(0,50,100,0.45)'; mmX.lineWidth = 0.5;
+  for (let i=-4;i<=4;i++) {
+    const gx = MM/2 + i*gs - ox, gz = MM/2 + i*gs - oz;
+    mmX.beginPath(); mmX.moveTo(gx,0); mmX.lineTo(gx,MM); mmX.stroke();
+    mmX.beginPath(); mmX.moveTo(0,gz); mmX.lineTo(MM,gz); mmX.stroke();
+  }
+
+  const scale = (MM/2) / MM_R;
+  const cx = MM/2, cz = MM/2;
+
+  // Buildings
+  mmX.fillStyle = 'rgba(15,50,110,0.65)';
+  for (const [, ch] of chunks) for (const b of ch.buildings) {
+    const sx = cx + (b.wx - playerPos.x) * scale;
+    const sz = cz + (b.wz - playerPos.z) * scale;
+    mmX.fillRect(sx - b.hw*scale, sz - b.hd*scale, Math.max(b.hw*2*scale,2), Math.max(b.hd*2*scale,2));
+  }
+
+  // Coins
+  for (const [, ch] of chunks) for (const coin of ch.coins) {
+    if (coin.collected) continue;
+    const sx = cx + (coin.wx - playerPos.x) * scale;
+    const sz = cz + (coin.wz - playerPos.z) * scale;
+    const r = coin.label==='gold' ? 3.5 : coin.label==='silver' ? 2.5 : 2;
+    mmX.fillStyle = coin.label==='gold'?'#ffdd00':coin.label==='silver'?'#aabbff':'#ff8822';
+    mmX.beginPath(); mmX.arc(sx,sz,r,0,Math.PI*2); mmX.fill();
+  }
+
+  // Player arrow (heading)
+  mmX.save();
+  mmX.translate(cx, cz);
+  mmX.rotate(-heading);
+  mmX.fillStyle = '#00ffcc';
+  mmX.shadowColor = '#00ffcc'; mmX.shadowBlur = 5;
+  mmX.beginPath();
+  mmX.moveTo(0,-8); mmX.lineTo(-4.5,5); mmX.lineTo(0,2.5); mmX.lineTo(4.5,5);
+  mmX.closePath(); mmX.fill();
+  mmX.restore();
+
+  mmX.restore();
+
+  // Border
+  mmX.strokeStyle='rgba(0,255,204,0.28)'; mmX.lineWidth=1;
+  mmX.beginPath(); mmX.arc(MM/2,MM/2,MM/2-1,0,Math.PI*2); mmX.stroke();
+  
+  // Compass ticks
+  mmX.fillStyle='rgba(0,255,204,0.5)'; mmX.font='8px Courier New'; mmX.textAlign='center';
+  mmX.fillText('N', MM/2, 10);
+  mmX.fillText('S', MM/2, MM-3);
+  mmX.fillText('W', 10, MM/2+3);
+  mmX.fillText('E', MM-8, MM/2+3);
+}
+
+// ════════════════════════════════════════════
+//  SCREEN HELPERS
+// ════════════════════════════════════════════
+function showSub(id) {
+  g('screen').classList.remove('hidden');
+  ['s-start','s-pause','s-gameover'].forEach(s=>g(s).style.display='none');
+  g(id).style.display='';
+}
+function hideScreen() { g('screen').classList.add('hidden'); }
+
+// ════════════════════════════════════════════
+//  MAIN LOOP
+// ════════════════════════════════════════════
+function animate(now = performance.now()) {
+  requestAnimationFrame(animate);
+  const dt = Math.min((now - lastT) / 1000, 0.05);
+  lastT = now;
+  update(dt);
+  renderer.render(scene, camera);
+}
+
+showSub('s-start');
+animate();
+</script>
+</body>
+</html>
