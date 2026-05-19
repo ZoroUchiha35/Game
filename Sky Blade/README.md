@@ -2,3 +2,4 @@
 Sky Blade is a high-speed open-world flying game where you pilot a futuristic aircraft through a neon-lit cyberpunk cityscape.
 
 - **Core Objective:** Fly through an endless procedurally generated city, collect valuable coins (Bronze +1, Silver +5, Gold +25), and avoid crashing into skyscrapers. You have 3 lives — every collision costs one life.
+- Flight Controls: Use W/S to fly forward/backward, A/D to turn, SPACE to climb, C to dive, and SHIFT for afterburner boost. Your heading, altitude, and speed are displayed in real-time.
