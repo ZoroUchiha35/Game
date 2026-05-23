@@ -5,4 +5,4 @@ Sky Blade is a high-speed open-world flying game where you pilot a futuristic ai
 - **Flight Controls:** Use **W/S** to fly forward/backward, **A/D** to turn or the **Arrow keys**, **SPACE** to climb, **C** to dive, and **SHIFT** for afterburner boost. Your heading, altitude, and speed are displayed in real-time.
 - **Visual Feedback:** Collecting coins triggers color-coded screen flashes, musical tones, and floating popups. Collisions cause camera shake, a damage flash, and a low-frequency alarm tone.
 - **Radar System:** A circular minimap shows nearby buildings and uncollected coins, with a directional arrow representing your aircraft's heading.
-- Progressive Challenge: The world generates infinitely as you fly — denser building clusters and coins placed at varying altitudes demand precise maneuvering and risk-reward decision making.
+- **Progressive Challenge:** The world generates infinitely as you fly — denser building clusters and coins placed at varying altitudes demand precise maneuvering and risk-reward decision making.
