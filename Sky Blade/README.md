@@ -6,3 +6,5 @@ Sky Blade is a high-speed open-world flying game where you pilot a futuristic ai
 - **Visual Feedback:** Collecting coins triggers color-coded screen flashes, musical tones, and floating popups. Collisions cause camera shake, a damage flash, and a low-frequency alarm tone.
 - **Radar System:** A circular minimap shows nearby buildings and uncollected coins, with a directional arrow representing your aircraft's heading.
 - **Progressive Challenge:** The world generates infinitely as you fly — denser building clusters and coins placed at varying altitudes demand precise maneuvering and risk-reward decision making.
+
+<img width="1365" height="628" alt="image" src="https://github.com/user-attachments/assets/2dfcab7f-55a6-4207-9717-d9948da82517" />
