@@ -5,6 +5,7 @@ This Flappy Bird game captures the classic challenge with a clean, modern look.
 - **Progressive Speed:** The game speed starts at 1.0x. It increases by 0.2x every 5 points you score `(reaching 1.2x at 5 points, 1.4x at 10, and so on).` The current multiplier is shown below the game area.
 - **Expanded Play Area:** The game now runs on a **1000 x 550 pixels** canvas, providing a wider and taller view. The bird, pipes, and ground have been slightly scaled for better proportion.
 
-<img width="1346" height="631" alt="image" src="https://github.com/user-attachments/assets/81e22428-4e04-472f-9e6e-40d5e31b4829" />
+<img width="1347" height="631" alt="image" src="https://github.com/user-attachments/assets/bc508e63-4d45-404a-aca2-a29b4ac850ba" />
+
 
 ##### The image above shows the Game
