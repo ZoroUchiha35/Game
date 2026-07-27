@@ -13,13 +13,13 @@ Play all games here: **https://zorouchiha35.github.io/Game/**
 
 ## 📁 Games Available
 
-|     Game                 |         Description                                    |
-|--------------------------|--------------------------------------------------------|
-| 🐦 **Flappy Bird**      | Tap to fly, avoid pipes. The classic arcade challenge.  |
-| 🧠 **Flip Flop Memory** | Test your memory. Match pairs, train your brain.        |
-| 🏓 **Ping Pong**        | Hit the ball past your opponent to score. Classic play with AI arcade fun.  |
-| 🛩️ **Sky Blade**        |Fly a jet through a neon city, collect coins, and dodge buildings. Boost, climb, and survive in this open-world 3D flight game.|
-| 🪐 **Orbital**
+|     Game                  |         Description                                    |
+|---------------------------|--------------------------------------------------------|
+| 🐦 **Flappy Bird**        | Tap to fly, avoid pipes. The classic arcade challenge.  |
+| 🧠 **Flip Flop Memory**   | Test your memory. Match pairs, train your brain.        |
+| 🏓 **Ping Pong**          | Hit the ball past your opponent to score. Classic play with AI arcade fun.  |
+| 🛩️ **Sky Blade**          |Fly a jet through a neon city, collect coins, and dodge buildings. Boost, climb, and survive in this open-world 3D flight game.|
+| 🪐 **Orbital**            |
 
 ## ✨ Features
 
