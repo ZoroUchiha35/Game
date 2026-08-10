@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Orbital - Space Exploration</title>
+<style>
+  :root{
+    --bg:#05070d;
+    --panel:rgba(9,13,24,0.86);
+    --panel-border:rgba(94,230,208,0.16);
+    --cyan:#5ee6d0;
+    --cyan-dim:#2f6b64;
+    --amber:#ffb454;
+    --red:#ff6b6b;
+    --text:#d9e6e8;
+    --text-dim:#5f7078;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", "Consolas", monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; user-select:none;}
+  html,body{width:100%; height:100%; overflow:hidden; background:var(--bg); font-family:var(--mono); color:var(--text);}
+  #app{position:relative; width:100vw; height:100vh;}
+  canvas#scene{display:block; width:100%; height:100%; touch-action:none; cursor:crosshair;}
+
+  .hud{position:absolute; pointer-events:none; z-index:5;}
+  .hud .interactive{pointer-events:auto;}
+
+  /* ---- top bar ---- */
+  #topbar{
+    top:0; left:0; right:0; height:52px;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0 16px;
+    background:linear-gradient(to bottom, rgba(5,7,13,0.92), rgba(5,7,13,0));
+  }
+  #brand{display:flex; align-items:center; gap:9px; letter-spacing:0.1em;}
+  #brand .dot{width:7px; height:7px; border-radius:50%; background:var(--amber); box-shadow:0 0 8px var(--amber);}
+  #brand .title{font-size:12.5px; font-weight:600; color:var(--amber);}
+  #brand .sub{font-size:9.5px; color:var(--text-dim); letter-spacing:0.08em;}
+  #clock{font-size:10px; color:var(--text-dim); text-align:right;}
+  #clock .date{color:var(--text); font-size:12px; display:block;}
+  #timebtns{display:flex; gap:4px; margin-top:3px; justify-content:flex-end;}
+  .tbtn{
+    pointer-events:auto; background:rgba(10,16,28,0.7); border:1px solid var(--panel-border);
+    color:var(--text-dim); font-family:var(--mono); font-size:9.5px; letter-spacing:0.04em;
+    padding:3px 7px; border-radius:3px; cursor:pointer;
+  }
+  .tbtn.active{color:var(--bg); background:var(--cyan); border-color:var(--cyan); font-weight:600;}
+  .tbtn:focus-visible{outline:2px solid var(--cyan); outline-offset:1px;}
+
+  /* ---- crosshair ---- */
+  #crosshair{
+    top:50%; left:50%; width:22px; height:22px; margin:-11px 0 0 -11px;
+    border:1px solid rgba(94,230,208,0.55); border-radius:50%;
+  }
+  #crosshair::before,#crosshair::after{
+    content:''; position:absolute; background:rgba(94,230,208,0.65);
+  }
+  #crosshair::before{ left:50%; top:-5px; width:1px; height:5px; margin-left:-0.5px;}
+  #crosshair::after{ left:-5px; top:50%; width:5px; height:1px; margin-top:-0.5px;}
+
+  /* ---- nav reticle ---- */
+  #reticle{
+    top:0; left:0; width:64px; height:64px; margin:-32px 0 0 -32px;
+    transition:opacity .15s ease;
+  }
+  #reticle .diamond{
+    position:absolute; top:50%; left:50%; width:16px; height:16px; margin:-8px 0 0 -8px;
+    border:1.5px solid var(--amber); transform:rotate(45deg);
+  }
+  #reticle .arrow{
+    position:absolute; top:50%; left:50%; width:0; height:0; margin:-24px 0 0 -6px;
+    border-left:6px solid transparent; border-right:6px solid transparent; border-bottom:11px solid var(--amber);
+    transform-origin:6px 24px;
+  }
+  #reticle .lbl{
+    position:absolute; top:100%; left:50%; transform:translateX(-50%); margin-top:4px;
+    font-size:9.5px; color:var(--amber); white-space:nowrap; text-align:center; letter-spacing:0.04em;
+  }
+
+  /* ---- left: body list ---- */
+  #bodylist{ top:64px; left:14px; width:150px; display:flex; flex-direction:column; gap:2px;}
+  .bodybtn{
+    pointer-events:auto; display:flex; align-items:center; gap:8px;
+    background:transparent; border:1px solid transparent; color:var(--text-dim);
+    font-family:var(--mono); font-size:11px; letter-spacing:0.02em;
+    padding:5px 7px; text-align:left; cursor:pointer; border-radius:3px;
+  }
+  .bodybtn:hover{color:var(--text); background:rgba(94,230,208,0.06);}
+  .bodybtn.selected{color:var(--amber); background:rgba(255,180,84,0.08); border-color:rgba(255,180,84,0.25);}
+  .swatch{width:8px; height:8px; border-radius:50%; flex-shrink:0;}
+  .bodybtn:focus-visible{outline:2px solid var(--cyan); outline-offset:1px;}
+
+  /* ---- right: nav panel ---- */
+  #navpanel{
+    top:64px; right:14px; width:198px;
+    background:var(--panel); border:1px solid var(--panel-border); border-radius:4px;
+    padding:12px 14px 14px; backdrop-filter:blur(6px);
+  }
+  #navpanel h2{font-size:12.5px; color:var(--amber); letter-spacing:0.06em; margin-bottom:8px;}
+  #navpanel .empty{font-size:10.5px; color:var(--text-dim); line-height:1.5;}
+  .stat-row{
+    display:flex; justify-content:space-between; align-items:baseline;
+    font-size:10px; padding:3.5px 0; border-top:1px solid rgba(94,230,208,0.08);
+  }
+  .stat-row .k{color:var(--text-dim); letter-spacing:0.03em;}
+  .stat-row .v{color:var(--cyan); text-align:right;}
+  #apBtn{
+    pointer-events:auto; width:100%; margin-top:10px; padding:8px;
+    background:rgba(94,230,208,0.1); border:1px solid var(--cyan-dim); color:var(--cyan);
+    font-family:var(--mono); font-size:10.5px; letter-spacing:0.06em; border-radius:3px; cursor:pointer;
+  }
+  #apBtn.engaged{background:var(--amber); border-color:var(--amber); color:#1a1000; font-weight:700;}
+  #apBtn:focus-visible{outline:2px solid var(--cyan); outline-offset:2px;}
+
+  /* ---- radar ---- */
+  #radarLabel{bottom:150px; left:14px; width:132px; text-align:center; font-size:8.5px; color:var(--text-dim); letter-spacing:0.14em;}
+  #radarwrap{
+    bottom:14px; left:14px; width:132px; height:132px;
+    background:var(--panel); border:1px solid var(--panel-border); border-radius:50%; backdrop-filter:blur(4px);
+  }
+  canvas#radar{width:132px; height:132px; border-radius:50%;}
+
+  /* ---- flight telemetry strip ---- */
+  #telemetry{
+    bottom:14px; left:50%; transform:translateX(-50%);
+    display:flex; align-items:center; gap:16px;
+    background:var(--panel); border:1px solid var(--panel-border); border-radius:4px;
+    padding:9px 18px; backdrop-filter:blur(6px);
+  }
+  .tele-block{display:flex; flex-direction:column; align-items:center; gap:3px; min-width:64px;}
+  .tele-block .lbl{font-size:8px; color:var(--text-dim); letter-spacing:0.1em;}
+  .tele-block .val{font-size:13px; color:var(--cyan); font-weight:600;}
+  .tele-block .val.warn{color:var(--amber);}
+  #throttleBar{width:64px; height:5px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden;}
+  #throttleFill{height:100%; width:0%; background:var(--cyan); transition:width .08s linear;}
+  #dampBtn, #viewBtn{
+    pointer-events:auto; background:rgba(10,16,28,0.7); border:1px solid var(--panel-border);
+    color:var(--text-dim); font-family:var(--mono); font-size:9px; letter-spacing:0.04em;
+    padding:6px 9px; border-radius:3px; cursor:pointer;
+  }
+  #dampBtn.on{color:var(--bg); background:var(--cyan); border-color:var(--cyan); font-weight:700;}
+
+  /* ---- flight control buttons (touch + click friendly) ---- */
+  #flightpad{ bottom:150px; right:14px; display:flex; flex-direction:column; align-items:flex-end; gap:6px;}
+  .padrow{display:flex; gap:6px;}
+  .padbtn{
+    pointer-events:auto; width:46px; height:46px; border-radius:6px;
+    background:rgba(10,16,28,0.75); border:1px solid var(--panel-border); color:var(--cyan);
+    font-size:17px; display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .padbtn:active, .padbtn.pressed{background:var(--cyan); color:var(--bg);}
+  #boostBtn{width:98px; font-size:10px; letter-spacing:0.06em;}
+  #boostBtn.pressed{background:var(--amber); color:#1a1000; border-color:var(--amber);}
+
+  /* ---- joystick visual ---- */
+  #joyBase{position:absolute; width:96px; height:96px; margin:-48px 0 0 -48px; border-radius:50%; border:1.5px solid rgba(94,230,208,0.3); display:none;}
+  #joyNub{position:absolute; width:34px; height:34px; margin:-17px 0 0 -17px; border-radius:50%; background:rgba(94,230,208,0.35); border:1px solid rgba(94,230,208,0.7);}
+
+  /* ---- start overlay ---- */
+  #startOverlay{
+    position:absolute; inset:0; z-index:20; display:flex; align-items:center; justify-content:center;
+    background:rgba(4,6,11,0.88); backdrop-filter:blur(3px); text-align:center; padding:20px;
+  }
+  #startOverlay.hidden{display:none;}
+  #startCard{max-width:420px;}
+  #startCard h1{font-size:19px; color:var(--amber); letter-spacing:0.08em; margin-bottom:10px;}
+  #startCard p{font-size:11.5px; color:var(--text-dim); line-height:1.7; margin-bottom:6px;}
+  #startCard .key{color:var(--cyan); font-weight:600;}
+  #startBtn{
+    pointer-events:auto; margin-top:16px; padding:11px 26px;
+    background:var(--cyan); color:var(--bg); border:none; border-radius:4px;
+    font-family:var(--mono); font-size:12px; font-weight:700; letter-spacing:0.08em; cursor:pointer;
+  }
+
+  #toggleUI{ position:absolute; top:14px; right:14px; z-index:6; display:none; pointer-events:auto;
+    background:var(--panel); border:1px solid var(--panel-border); color:var(--cyan);
+    font-family:var(--mono); font-size:9px; letter-spacing:0.06em; padding:7px 9px; border-radius:3px; cursor:pointer;
+  }
+
+  @media (max-width: 800px){
+    #bodylist{ top:auto; bottom:210px; left:8px; right:8px; width:auto; flex-direction:row; flex-wrap:wrap;
+      justify-content:center; background:var(--panel); border:1px solid var(--panel-border); border-radius:4px;
+      padding:7px; backdrop-filter:blur(6px); display:none;}
+    #bodylist.show{display:flex;}
+    #navpanel{ top:auto; bottom:210px; right:8px; left:8px; width:auto; display:none;}
+    #navpanel.show{display:block;}
+    #toggleUI{display:block;}
+    #brand .sub{display:none;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .padbtn, .tbtn, .bodybtn{transition:none;}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <canvas id="scene"></canvas>
+
+  <div class="hud" id="topbar">
+    <div id="brand">
+      <div class="dot"></div>
+      <div>
+        <div class="title">Orbital — PILOT MODE</div>
+        <div class="sub">NEWTONIAN FLIGHT · Solar System</div>
+      </div>
+    </div>
+    <div id="clock">
+      <span class="date" id="simDate">&mdash;</span>
+      <div id="timebtns">
+        <button class="tbtn interactive" id="btnPause">⏸</button>
+        <button class="tbtn interactive active" data-speed="6">6x</button>
+        <button class="tbtn interactive" data-speed="60">60x</button>
+        <button class="tbtn interactive" data-speed="600">600x</button>
+      </div>
+    </div>
+  </div>
+
+  <button id="toggleUI" class="interactive">☰ PANELS</button>
+
+  <div class="hud" id="crosshair"></div>
+  <div class="hud" id="reticle" style="opacity:0;">
+    <div class="diamond"></div>
+    <div class="arrow" id="reticleArrow"></div>
+    <div class="lbl" id="reticleLbl"></div>
+  </div>
+
+  <div class="hud interactive" id="bodylist"></div>
+
+  <div class="hud interactive" id="navpanel">
+    <h2>NAVIGATION</h2>
+    <div id="navBody">
+      <div class="empty">Select a body from the list to set a nav target.</div>
+    </div>
+  </div>
+
+  <div class="hud" id="radarLabel">RELATIVE POSITION TRACK</div>
+  <div class="hud interactive" id="radarwrap"><canvas id="radar" width="132" height="132"></canvas></div>
+
+  <div class="hud interactive" id="telemetry">
+    <div class="tele-block"><span class="lbl">SPEED</span><span class="val" id="speedVal">0.0</span></div>
+    <div class="tele-block"><span class="lbl">THROTTLE</span><div id="throttleBar"><div id="throttleFill"></div></div></div>
+    <button id="dampBtn" class="interactive on">DAMPENERS</button>
+    <button id="viewBtn" class="interactive">VIEW: CHASE</button>
+  </div>
+
+  <div class="hud" id="flightpad">
+    <button id="boostBtn" class="padbtn interactive">BOOST (SHIFT)</button>
+    <div class="padrow">
+      <button class="padbtn interactive" id="btnRollL" title="Roll left (Q)">⟲</button>
+      <button class="padbtn interactive" id="btnRollR" title="Roll right (E)">⟳</button>
+    </div>
+    <div class="padrow">
+      <button class="padbtn interactive" id="btnBrake" title="Reverse thrust (S)">▼</button>
+      <button class="padbtn interactive" id="btnThrust" title="Forward thrust (W)">▲</button>
+    </div>
+  </div>
+
+  <div class="hud" id="joyBase"><div id="joyNub"></div></div>
+
+  <div id="startOverlay">
+    <div id="startCard">
+      <h1>ENGINES READY</h1>
+      <p>Drag anywhere on the view to steer (pitch &amp; yaw).</p>
+      <p><span class="key">W/S</span> or the on-screen pad — thrust forward / reverse</p>
+      <p><span class="key">Q/E</span> — roll &middot; <span class="key">SHIFT</span> — boost &middot; <span class="key">X</span> — dampeners &middot; <span class="key">C</span> — view</p>
+      <p>Pick a body on the left and hit <span class="key">ENGAGE AUTOPILOT</span> to cruise there automatically.</p>
+      <button id="startBtn" class="interactive">LAUNCH</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   DATA — same real-world approximate constants as the orrery.
+   ============================================================ */
+const AU_KM = 149597870.7;
+const PLANETS = [
+  {name:"Mercury", desig:"TERRESTRIAL", radiusKm:2439.7, a:0.387, e:0.2056, period:87.97,  incl:7.00, rotHours:1407.6,  tiltDeg:0.03,  color:0x9c9285},
+  {name:"Venus",   desig:"TERRESTRIAL", radiusKm:6051.8, a:0.723, e:0.0068, period:224.70, incl:3.39, rotHours:-5832.5, tiltDeg:177.4, color:0xd8c08a},
+  {name:"Earth",   desig:"TERRESTRIAL", radiusKm:6371.0, a:1.000, e:0.0167, period:365.25, incl:0.00, rotHours:23.93,  tiltDeg:23.44, color:0x3f7fd9},
+  {name:"Mars",    desig:"TERRESTRIAL", radiusKm:3389.5, a:1.524, e:0.0934, period:686.98, incl:1.85, rotHours:24.62,  tiltDeg:25.19, color:0xc1502e},
+  {name:"Jupiter", desig:"GAS GIANT",   radiusKm:69911,  a:5.203, e:0.0489, period:4332.6, incl:1.30, rotHours:9.93,   tiltDeg:3.13,  color:0xd8b98a},
+  {name:"Saturn",  desig:"GAS GIANT",   radiusKm:58232,  a:9.537, e:0.0565, period:10759,  incl:2.49, rotHours:10.70,  tiltDeg:26.73, color:0xe3cf9e, ring:{inner:1.3, outer:2.3, color:0xcbb98a}},
+  {name:"Uranus",  desig:"ICE GIANT",   radiusKm:25362,  a:19.191,e:0.0457, period:30688.5,incl:0.77, rotHours:-17.24, tiltDeg:97.77, color:0x9fd8d8},
+  {name:"Neptune", desig:"ICE GIANT",   radiusKm:24622,  a:30.069,e:0.0113, period:60182,  incl:1.77, rotHours:16.11,  tiltDeg:28.32, color:0x3f5fd0},
+];
+const SUN = {radiusKm:696000, color:0xfff2c8};
+
+function sizeScale(radiusKm){ return Math.max(Math.cbrt(radiusKm) * 0.072, 0.45); }
+function distScale(au){ return 14 + Math.sqrt(au) * 22; }
+
+/* ============================================================
+   THREE.JS SETUP
+   ============================================================ */
+const canvas = document.getElementById('scene');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(58, innerWidth/innerHeight, 0.05, 4000);
+
+function resize(){
+  renderer.setSize(innerWidth, innerHeight);
+  camera.aspect = innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize);
+resize();
+
+function makeCircleTexture(){
+  const c = document.createElement('canvas'); c.width=c.height=64;
+  const ctx = c.getContext('2d');
+  const g = ctx.createRadialGradient(32,32,0,32,32,32);
+  g.addColorStop(0,'rgba(255,255,255,1)'); g.addColorStop(0.4,'rgba(255,255,255,0.8)'); g.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.fillStyle=g; ctx.fillRect(0,0,64,64);
+  return new THREE.CanvasTexture(c);
+}
+const dotTex = makeCircleTexture();
+
+(function starfield(){
+  const N = 4200;
+  const pos = new Float32Array(N*3);
+  const col = new Float32Array(N*3);
+  const tint = new THREE.Color();
+  for(let i=0;i<N;i++){
+    const r = 900 + Math.random()*1500;
+    const theta = Math.random()*Math.PI*2;
+    const phi = Math.acos(2*Math.random()-1);
+    pos[i*3]=r*Math.sin(phi)*Math.cos(theta);
+    pos[i*3+1]=r*Math.cos(phi);
+    pos[i*3+2]=r*Math.sin(phi)*Math.sin(theta);
+    tint.setHSL(Math.random()<0.85?0.58:0.55+Math.random()*0.1-0.05, 0.15, 0.6+Math.random()*0.4);
+    col[i*3]=tint.r; col[i*3+1]=tint.g; col[i*3+2]=tint.b;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos,3));
+  geo.setAttribute('color', new THREE.BufferAttribute(col,3));
+  const mat = new THREE.PointsMaterial({size:2.1, map:dotTex, vertexColors:true, transparent:true, depthWrite:false, sizeAttenuation:false});
+  scene.add(new THREE.Points(geo, mat));
+})();
+
+function planetTexture(baseColorHex, kind, seed){
+  const w=256,h=128;
+  const c = document.createElement('canvas'); c.width=w; c.height=h;
+  const ctx = c.getContext('2d');
+  const base = new THREE.Color(baseColorHex);
+  let rnd = seed*9301+49297;
+  function rand(){ rnd=(rnd*9301+49297)%233280; return rnd/233280; }
+  ctx.fillStyle = `#${base.getHexString()}`; ctx.fillRect(0,0,w,h);
+  if(kind==='gas'){
+    const bands = 10+Math.floor(rand()*6);
+    for(let i=0;i<bands;i++){
+      const y=(i/bands)*h, bh=h/bands;
+      const shade = base.clone().offsetHSL(0,(rand()-0.5)*0.08,(rand()-0.5)*0.18);
+      ctx.fillStyle=`rgba(${Math.floor(shade.r*255)},${Math.floor(shade.g*255)},${Math.floor(shade.b*255)},0.55)`;
+      ctx.fillRect(0,y,w,bh+1);
+    }
+    for(let i=0;i<40;i++){
+      ctx.fillStyle=`rgba(255,255,255,${rand()*0.05})`;
+      ctx.beginPath(); ctx.ellipse(rand()*w,rand()*h,14+rand()*30,3+rand()*6,0,0,Math.PI*2); ctx.fill();
+    }
+  } else {
+    for(let i=0;i<220;i++){
+      const shade = base.clone().offsetHSL(0,(rand()-0.5)*0.06,(rand()-0.5)*0.22);
+      ctx.fillStyle=`rgba(${Math.floor(shade.r*255)},${Math.floor(shade.g*255)},${Math.floor(shade.b*255)},0.5)`;
+      ctx.beginPath(); ctx.arc(rand()*w,rand()*h,2+rand()*10,0,Math.PI*2); ctx.fill();
+    }
+  }
+  return new THREE.CanvasTexture(c);
+}
+
+/* ---- sun ---- */
+const sunGroup = new THREE.Group();
+const sunRadius = sizeScale(SUN.radiusKm)*1.15 + 1.6;
+const sunMesh = new THREE.Mesh(
+  new THREE.SphereGeometry(sunRadius,48,32),
+  new THREE.MeshBasicMaterial({map: planetTexture(SUN.color,'gas',7), color:0xfff6d8})
+);
+sunGroup.add(sunMesh);
+function glowSprite(size, colorHex, opacity){
+  const c=document.createElement('canvas'); c.width=c.height=256;
+  const ctx=c.getContext('2d');
+  const g=ctx.createRadialGradient(128,128,0,128,128,128);
+  const col=new THREE.Color(colorHex);
+  g.addColorStop(0,`rgba(${col.r*255|0},${col.g*255|0},${col.b*255|0},${opacity})`);
+  g.addColorStop(1,`rgba(${col.r*255|0},${col.g*255|0},${col.b*255|0},0)`);
+  ctx.fillStyle=g; ctx.fillRect(0,0,256,256);
+  const tex=new THREE.CanvasTexture(c);
+  const mat=new THREE.SpriteMaterial({map:tex, transparent:true, depthWrite:false, blending:THREE.AdditiveBlending});
+  const spr=new THREE.Sprite(mat); spr.scale.set(size,size,1);
+  return spr;
+}
+sunGroup.add(glowSprite(sunRadius*7, 0xffdf9e, 0.75));
+sunGroup.add(glowSprite(sunRadius*3, 0xffffff, 0.9));
+scene.add(sunGroup);
+
+const sunLight = new THREE.PointLight(0xfff3d6, 2.4, 0, 0);
+scene.add(sunLight);
+scene.add(new THREE.AmbientLight(0x223344, 0.4));
+
+/* ============================================================
+   KEPLER SOLVER
+   ============================================================ */
+function solveKepler(M, e){
+  let E = M;
+  for(let i=0;i<6;i++) E = E - (E - e*Math.sin(E) - M) / (1 - e*Math.cos(E));
+  return E;
+}
+function orbitPosition(aScaled, e, M){
+  const E = solveKepler(M, e);
+  const trueAnomaly = 2*Math.atan2(Math.sqrt(1+e)*Math.sin(E/2), Math.sqrt(1-e)*Math.cos(E/2));
+  const r = aScaled*(1-e*Math.cos(E));
+  return {x:r*Math.cos(trueAnomaly), z:r*Math.sin(trueAnomaly)};
+}
+function buildOrbitLine(aScaled, e, inclRad, colorHex){
+  const pts=[]; const N=160;
+  for(let i=0;i<=N;i++){
+    const M=(i/N)*Math.PI*2;
+    const p=orbitPosition(aScaled,e,M);
+    pts.push(new THREE.Vector3(p.x, p.z*Math.sin(inclRad), p.z*Math.cos(inclRad)));
+  }
+  const geo=new THREE.BufferGeometry().setFromPoints(pts);
+  const mat=new THREE.LineBasicMaterial({color:colorHex, transparent:true, opacity:0.3});
+  return new THREE.Line(geo,mat);
+}
+
+/* ---- build planets ---- */
+const bodies = [];
+PLANETS.forEach((p, idx)=>{
+  const aScaled = distScale(p.a);
+  const inclRad = p.incl*Math.PI/180;
+  scene.add(buildOrbitLine(aScaled, p.e, inclRad, p.color));
+  const radius = sizeScale(p.radiusKm);
+  const kind = (p.name==='Jupiter'||p.name==='Saturn'||p.name==='Uranus'||p.name==='Neptune') ? 'gas' : 'rock';
+  const mesh = new THREE.Mesh(
+    new THREE.SphereGeometry(radius,40,28),
+    new THREE.MeshStandardMaterial({map: planetTexture(p.color, kind, idx+1), roughness:0.85, metalness:0.05})
+  );
+  mesh.rotation.z = p.tiltDeg*Math.PI/180;
+  scene.add(mesh);
+
+  let ringMesh = null;
+  if(p.ring){
+    const inner=radius*p.ring.inner, outer=radius*p.ring.outer;
+    const ringGeo=new THREE.RingGeometry(inner,outer,64);
+    const uv=ringGeo.attributes.uv, posAttr=ringGeo.attributes.position;
+    const v3=new THREE.Vector3();
+    for(let i=0;i<uv.count;i++){ v3.fromBufferAttribute(posAttr,i); uv.setXY(i,(v3.length()-inner)/(outer-inner),1); }
+    const rc=document.createElement('canvas'); rc.width=64; rc.height=4;
+    const rctx=rc.getContext('2d');
+    const rg=rctx.createLinearGradient(0,0,64,0);
+    const rcol=new THREE.Color(p.ring.color);
+    rg.addColorStop(0,`rgba(${rcol.r*255|0},${rcol.g*255|0},${rcol.b*255|0},0)`);
+    rg.addColorStop(0.3,`rgba(${rcol.r*255|0},${rcol.g*255|0},${rcol.b*255|0},0.7)`);
+    rg.addColorStop(0.6,`rgba(${rcol.r*255|0},${rcol.g*255|0},${rcol.b*255|0},0.3)`);
+    rg.addColorStop(1,`rgba(${rcol.r*255|0},${rcol.g*255|0},${rcol.b*255|0},0.6)`);
+    rctx.fillStyle=rg; rctx.fillRect(0,0,64,4);
+    const ringMat=new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(rc), side:THREE.DoubleSide, transparent:true, opacity:0.85});
+    ringMesh=new THREE.Mesh(ringGeo, ringMat);
+    ringMesh.rotation.x = Math.PI/2 - (p.tiltDeg*Math.PI/180);
+    scene.add(ringMesh);
+  }
+  bodies.push({data:p, mesh, ringMesh, aScaled, inclRad, phase: idx*1.3712+0.4, radius, prevPos:new THREE.Vector3()});
+});
+
+/* ============================================================
+   SHIP
+   ============================================================ */
+const ship = new THREE.Group();
+{
+  const hullMat = new THREE.MeshStandardMaterial({color:0xd7dde3, metalness:0.65, roughness:0.32});
+  const accentMat = new THREE.MeshStandardMaterial({color:0xffb454, emissive:0x552e00, metalness:0.4, roughness:0.4});
+  const glassMat = new THREE.MeshStandardMaterial({color:0x5ee6d0, emissive:0x2a8a7a, metalness:0.2, roughness:0.15});
+
+  const nose = new THREE.Mesh(new THREE.ConeGeometry(0.34, 1.1, 10), hullMat);
+  nose.rotation.x = -Math.PI/2; nose.position.z = -1.0;
+  ship.add(nose);
+
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.4, 1.5, 12), hullMat);
+  body.rotation.x = Math.PI/2; body.position.z = -0.05;
+  ship.add(body);
+
+  const cockpit = new THREE.Mesh(new THREE.SphereGeometry(0.22, 12, 10), glassMat);
+  cockpit.position.set(0, 0.28, -0.55);
+  cockpit.scale.set(1,0.7,1.3);
+  ship.add(cockpit);
+
+  const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 1.3), accentMat);
+  stripe.position.set(0, 0.36, -0.1);
+  ship.add(stripe);
+
+  const wingGeo = new THREE.BoxGeometry(1.5, 0.06, 0.75);
+  const wingL = new THREE.Mesh(wingGeo, hullMat); wingL.position.set(-0.85, -0.02, 0.35); wingL.rotation.z = 0.08;
+  const wingR = new THREE.Mesh(wingGeo, hullMat); wingR.position.set(0.85, -0.02, 0.35); wingR.rotation.z = -0.08;
+  ship.add(wingL, wingR);
+
+  const finGeo = new THREE.BoxGeometry(0.28,0.28,0.05);
+  const finL = new THREE.Mesh(finGeo, accentMat); finL.position.set(-1.5,0.02,0.55);
+  const finR = new THREE.Mesh(finGeo, accentMat); finR.position.set(1.5,0.02,0.55);
+  ship.add(finL, finR);
+
+  const nozzleGeo = new THREE.CylinderGeometry(0.16,0.2,0.3,10);
+  const nozL = new THREE.Mesh(nozzleGeo, hullMat); nozL.rotation.x=Math.PI/2; nozL.position.set(-0.35,-0.02,0.85);
+  const nozR = new THREE.Mesh(nozzleGeo, hullMat); nozR.rotation.x=Math.PI/2; nozR.position.set(0.35,-0.02,0.85);
+  ship.add(nozL, nozR);
+}
+ship.position.set(0, 6, distScale(1.6));
+scene.add(ship);
+
+const engineGlowL = glowSprite(1.6, 0x5ee6d0, 0.9);
+const engineGlowR = glowSprite(1.6, 0x5ee6d0, 0.9);
+engineGlowL.position.set(-0.35,-0.02,1.0); engineGlowR.position.set(0.35,-0.02,1.0);
+ship.add(engineGlowL, engineGlowR);
+
+/* ---- engine particle pool ---- */
+const PARTICLE_COUNT = 70;
+const particles = [];
+const particleTexBase = dotTex;
+for(let i=0;i<PARTICLE_COUNT;i++){
+  const mat = new THREE.SpriteMaterial({map:particleTexBase, transparent:true, opacity:0, depthWrite:false, blending:THREE.AdditiveBlending});
+  const spr = new THREE.Sprite(mat);
+  spr.scale.set(0.01,0.01,1);
+  scene.add(spr);
+  particles.push({sprite:spr, life:0, maxLife:1, vel:new THREE.Vector3()});
+}
+let particleCursor = 0;
+function spawnParticle(worldPos, backward, jitter, boosted){
+  const p = particles[particleCursor];
+  particleCursor = (particleCursor+1) % PARTICLE_COUNT;
+  p.sprite.position.copy(worldPos);
+  p.sprite.position.x += (Math.random()-0.5)*jitter;
+  p.sprite.position.y += (Math.random()-0.5)*jitter;
+  p.sprite.position.z += (Math.random()-0.5)*jitter;
+  p.vel.copy(backward).multiplyScalar(6+Math.random()*4).add(shipVelocity.clone().multiplyScalar(0.4));
+  p.life = p.maxLife = 0.35 + Math.random()*0.25;
+  p.sprite.material.color.set(boosted ? 0xffcf8a : 0x9fe8ff);
+}
+
+/* ============================================================
+   FLIGHT STATE & INPUT
+   ============================================================ */
+const shipVelocity = new THREE.Vector3(0,0,0);
+const keys = {}; // flags: thrust, brake, rollL, rollR, boost
+let dampenersOn = true;
+let viewMode = 'chase'; // 'chase' | 'cockpit'
+let started = false;
+
+const ACCEL = 15, BOOST_MULT = 2.4, ROLL_SPEED = 1.7, TURN_RATE_MAX = 1.35;
+const MAX_SPEED = 46, MAX_SPEED_BOOST = 108;
+
+window.addEventListener('keydown', e=>{
+  const k = e.key.toLowerCase();
+  if(k==='w') keys.thrust=true;
+  if(k==='s') keys.brake=true;
+  if(k==='q') keys.rollL=true;
+  if(k==='e') keys.rollR=true;
+  if(k==='shift') keys.boost=true;
+  if(k==='x') toggleDampeners();
+  if(k==='c') toggleView();
+});
+window.addEventListener('keyup', e=>{
+  const k = e.key.toLowerCase();
+  if(k==='w') keys.thrust=false;
+  if(k==='s') keys.brake=false;
+  if(k==='q') keys.rollL=false;
+  if(k==='e') keys.rollR=false;
+  if(k==='shift') keys.boost=false;
+});
+
+function bindHold(id, flag){
+  const el = document.getElementById(id);
+  const on = (e)=>{ e.preventDefault(); keys[flag]=true; el.classList.add('pressed'); };
+  const off = ()=>{ keys[flag]=false; el.classList.remove('pressed'); };
+  el.addEventListener('pointerdown', on);
+  el.addEventListener('pointerup', off);
+  el.addEventListener('pointerleave', off);
+  el.addEventListener('pointercancel', off);
+}
+bindHold('btnThrust','thrust');
+bindHold('btnBrake','brake');
+bindHold('btnRollL','rollL');
+bindHold('btnRollR','rollR');
+bindHold('boostBtn','boost');
+
+document.getElementById('dampBtn').addEventListener('click', toggleDampeners);
+document.getElementById('viewBtn').addEventListener('click', toggleView);
+function toggleDampeners(){
+  dampenersOn = !dampenersOn;
+  const b = document.getElementById('dampBtn');
+  b.classList.toggle('on', dampenersOn);
+  b.textContent = dampenersOn ? 'DAMPENERS' : 'DAMPENERS OFF';
+}
+function toggleView(){
+  viewMode = (viewMode==='chase') ? 'cockpit' : 'chase';
+  document.getElementById('viewBtn').textContent = 'VIEW: ' + (viewMode==='chase'?'CHASE':'COCKPIT');
+}
+
+/* ---- drag-to-steer joystick (pointer events; works for mouse + touch) ---- */
+let dragging = false, dragStartX=0, dragStartY=0, dragDX=0, dragDY=0;
+const JOY_RADIUS = 70;
+const joyBase = document.getElementById('joyBase');
+const joyNub = document.getElementById('joyNub');
+
+canvas.addEventListener('pointerdown', e=>{
+  if(!started) return;
+  dragging = true;
+  dragStartX = e.clientX; dragStartY = e.clientY;
+  dragDX = 0; dragDY = 0;
+  joyBase.style.display = 'block';
+  joyBase.style.left = dragStartX+'px';
+  joyBase.style.top = dragStartY+'px';
+  joyNub.style.transform = 'translate(0px,0px)';
+  canvas.setPointerCapture(e.pointerId);
+});
+canvas.addEventListener('pointermove', e=>{
+  if(!dragging) return;
+  let dx = e.clientX - dragStartX, dy = e.clientY - dragStartY;
+  const len = Math.hypot(dx,dy);
+  if(len > JOY_RADIUS){ dx = dx/len*JOY_RADIUS; dy = dy/len*JOY_RADIUS; }
+  dragDX = dx/JOY_RADIUS; dragDY = dy/JOY_RADIUS;
+  joyNub.style.transform = `translate(${dx}px,${dy}px)`;
+});
+function endDrag(){ dragging=false; dragDX=0; dragDY=0; joyBase.style.display='none'; }
+canvas.addEventListener('pointerup', endDrag);
+canvas.addEventListener('pointerleave', endDrag);
+canvas.addEventListener('pointercancel', endDrag);
+
+function manualInputActive(){
+  return keys.thrust || keys.brake || keys.rollL || keys.rollR || dragging;
+}
+
+/* ============================================================
+   NAV TARGET & AUTOPILOT
+   ============================================================ */
+let navTarget = null; // null = none selected, -1 = Sol, 0..7 = planet index (bodies array)
+let autopilotEngaged = false;
+let autoHoldOffset = null;
+const lookHelper = new THREE.Object3D();
+const AP_CRUISE_SPEED = 62, AP_MAX_ACCEL = 34;
+
+function targetPosition(idx){
+  if(idx===-1) return sunGroup.position;
+  return bodies[idx].mesh.position;
+}
+function targetRadius(idx){
+  if(idx===-1) return sunRadius;
+  return bodies[idx].radius;
+}
+function targetLabel(idx){
+  if(idx===-1) return 'Sun';
+  return bodies[idx].data.name;
+}
+
+const bodyListEl = document.getElementById('bodylist');
+function makeListButton(id, label, colorHex, idx){
+  const btn = document.createElement('button');
+  btn.className = 'bodybtn interactive';
+  btn.id = 'nb-'+id;
+  btn.innerHTML = `<span class="swatch" style="background:#${colorHex.toString(16).padStart(6,'0')}"></span><span>${label}</span>`;
+  btn.addEventListener('click', ()=>setNavTarget(idx));
+  bodyListEl.appendChild(btn);
+}
+makeListButton('sun','Sun', 0xffe08a, -1);
+PLANETS.forEach((p,i)=> makeListButton(i, p.name, p.color, i));
+
+function setNavTarget(idx){
+  navTarget = idx;
+  autopilotEngaged = false;
+  autoHoldOffset = null;
+  document.querySelectorAll('.bodybtn').forEach(b=>b.classList.remove('selected'));
+  const btn = document.getElementById('nb-'+(idx===-1?'sun':idx));
+  if(btn) btn.classList.add('selected');
+  renderNavPanel();
+}
+
+const navBodyEl = document.getElementById('navBody');
+function renderNavPanel(){
+  if(navTarget===null || navTarget===undefined){
+    navBodyEl.innerHTML = '<div class="empty">Select a body from the list to set a nav target.</div>';
+    return;
+  }
+  const name = targetLabel(navTarget);
+  const dist = targetPosition(navTarget).distanceTo(ship.position);
+  const speed = shipVelocity.length();
+  const eta = speed > 0.4 ? (dist/speed) : Infinity;
+  navBodyEl.innerHTML = `
+    <div class="stat-row"><span class="k">TARGET</span><span class="v">${name.toUpperCase()}</span></div>
+    <div class="stat-row"><span class="k">RANGE</span><span class="v">${dist.toFixed(1)} su</span></div>
+    <div class="stat-row"><span class="k">ETA</span><span class="v">${isFinite(eta) ? eta.toFixed(0)+' s' : '—'}</span></div>
+    <div class="stat-row"><span class="k">STATUS</span><span class="v">${autoHoldOffset ? 'STATION KEEPING' : (autopilotEngaged ? 'EN ROUTE' : 'MANUAL')}</span></div>
+  `;
+  const apBtn = document.createElement('button');
+  apBtn.id = 'apBtn';
+  apBtn.className = 'interactive' + (autopilotEngaged ? ' engaged' : '');
+  apBtn.textContent = autopilotEngaged ? 'DISENGAGE AUTOPILOT' : 'ENGAGE AUTOPILOT';
+  apBtn.addEventListener('click', ()=>{
+    autopilotEngaged = !autopilotEngaged;
+    autoHoldOffset = null;
+    renderNavPanel();
+  });
+  navBodyEl.appendChild(apBtn);
+}
+renderNavPanel();
+
+/* ============================================================
+   TIME
+   ============================================================ */
+let simDays = 0, speedDaysPerSec = 6, paused = false;
+const startDate = new Date();
+function formatSimDate(){
+  const d = new Date(startDate.getTime() + simDays*86400000);
+  return d.toISOString().slice(0,10).replace(/-/g,'.');
+}
+document.getElementById('btnPause').addEventListener('click', (e)=>{
+  paused = !paused;
+  e.target.classList.toggle('active', paused);
+});
+document.querySelectorAll('[data-speed]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    speedDaysPerSec = parseFloat(btn.dataset.speed);
+    document.querySelectorAll('[data-speed]').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+document.getElementById('toggleUI').addEventListener('click', ()=>{
+  bodyListEl.classList.toggle('show');
+  document.getElementById('navpanel').classList.toggle('show');
+});
+
+document.getElementById('startBtn').addEventListener('click', ()=>{
+  started = true;
+  document.getElementById('startOverlay').classList.add('hidden');
+});
+
+/* ============================================================
+   RADAR (ship-centered)
+   ============================================================ */
+const radarCanvas = document.getElementById('radar');
+const rctx2 = radarCanvas.getContext('2d');
+const RADAR_SIZE = 132, RADAR_RANGE = 65;
+
+function drawRadar(){
+  const cx=RADAR_SIZE/2, cy=RADAR_SIZE/2, R=RADAR_SIZE/2-6;
+  rctx2.clearRect(0,0,RADAR_SIZE,RADAR_SIZE);
+  rctx2.fillStyle='rgba(6,10,18,0.9)';
+  rctx2.beginPath(); rctx2.arc(cx,cy,R+4,0,Math.PI*2); rctx2.fill();
+  rctx2.strokeStyle='rgba(94,230,208,0.18)'; rctx2.lineWidth=1;
+  for(let i=1;i<=3;i++){ rctx2.beginPath(); rctx2.arc(cx,cy,R*(i/3),0,Math.PI*2); rctx2.stroke(); }
+
+  function plot(pos, colorHex, sel){
+    let dx = pos.x - ship.position.x, dz = pos.z - ship.position.z;
+    let dist = Math.hypot(dx,dz);
+    const clamped = dist > RADAR_RANGE;
+    if(clamped){ dx = dx/dist*RADAR_RANGE; dz = dz/dist*RADAR_RANGE; }
+    const px = cx + (dx/RADAR_RANGE)*R;
+    const py = cy - (dz/RADAR_RANGE)*R;
+    rctx2.globalAlpha = clamped ? 0.45 : 1;
+    rctx2.fillStyle = colorHex;
+    rctx2.beginPath(); rctx2.arc(px,py, sel?3:2, 0, Math.PI*2); rctx2.fill();
+    rctx2.globalAlpha = 1;
+  }
+  plot(sunGroup.position, '#ffe08a', navTarget===-1);
+  bodies.forEach((b,idx)=> plot(b.mesh.position, `#${b.data.color.toString(16).padStart(6,'0')}`, navTarget===idx));
+
+  // ship marker (heading arrow, world-frame, north = -Z)
+  const fwd = new THREE.Vector3(0,0,-1).applyQuaternion(ship.quaternion);
+  const hAngle = Math.atan2(fwd.x, -fwd.z);
+  rctx2.save();
+  rctx2.translate(cx,cy); rctx2.rotate(hAngle);
+  rctx2.fillStyle = '#ffffff';
+  rctx2.beginPath();
+  rctx2.moveTo(0,-6); rctx2.lineTo(4,5); rctx2.lineTo(-4,5); rctx2.closePath(); rctx2.fill();
+  rctx2.restore();
+}
+
+/* ============================================================
+   NAV RETICLE (screen-space projection of nav target)
+   ============================================================ */
+const reticleEl = document.getElementById('reticle');
+const reticleArrow = document.getElementById('reticleArrow');
+const reticleLbl = document.getElementById('reticleLbl');
+let reticleTextTimer = 0;
+const tmpV = new THREE.Vector3();
+
+function updateReticle(dt){
+  if(navTarget===undefined || navTarget===null){ reticleEl.style.opacity=0; return; }
+  const pos = targetPosition(navTarget);
+  tmpV.copy(pos).project(camera);
+  const W = innerWidth, H = innerHeight;
+  let x = (tmpV.x*0.5+0.5)*W;
+  let y = (1-(tmpV.y*0.5+0.5))*H;
+  const behind = tmpV.z > 1;
+  if(behind){ x = W - x; y = H - y; }
+  const cx = W/2, cy = H/2;
+  const margin = Math.min(W,H)*0.42;
+  const dx = x-cx, dy = y-cy;
+  const dist = Math.hypot(dx,dy);
+  let clampedX = x, clampedY = y, offEdge = false;
+  if(dist > margin || behind){
+    offEdge = true;
+    const ang = Math.atan2(dy,dx);
+    clampedX = cx + Math.cos(ang)*margin;
+    clampedY = cy + Math.sin(ang)*margin;
+  }
+  reticleEl.style.opacity = 1;
+  reticleEl.style.transform = `translate(${clampedX-32}px, ${clampedY-32}px)`;
+  reticleArrow.style.display = offEdge ? 'block' : 'none';
+  if(offEdge){
+    const ang = Math.atan2(clampedY-cy, clampedX-cx) + Math.PI/2;
+    reticleArrow.style.transform = `rotate(${ang}rad)`;
+  }
+  reticleTextTimer += dt;
+  if(reticleTextTimer > 0.15){
+    reticleTextTimer = 0;
+    const rangeSU = pos.distanceTo(ship.position);
+    reticleLbl.textContent = `${targetLabel(navTarget).toUpperCase()} · ${rangeSU.toFixed(1)} su`;
+  }
+}
+
+/* ============================================================
+   MAIN LOOP
+   ============================================================ */
+const speedVal = document.getElementById('speedVal');
+const throttleFill = document.getElementById('throttleFill');
+let lastT = performance.now();
+let hudTimer = 0;
+const backwardTmp = new THREE.Vector3();
+const engineWorldPos = new THREE.Vector3();
+const chaseCamPos = new THREE.Vector3();
+const chaseOffset = new THREE.Vector3(0, 1.1, 5.2);
+const cockpitOffset = new THREE.Vector3(0, 0.32, -0.9);
+
+function animate(now){
+  const dt = Math.min((now-lastT)/1000, 0.1);
+  lastT = now;
+  requestAnimationFrame(animate);
+
+  if(!paused) simDays += dt*speedDaysPerSec;
+  document.getElementById('simDate').textContent = formatSimDate();
+  sunMesh.rotation.y += dt*0.05;
+
+  bodies.forEach(b=>{
+    b.prevPos.copy(b.mesh.position);
+    const p = b.data;
+    const n = (2*Math.PI)/p.period;
+    const M = (b.phase + n*simDays) % (Math.PI*2);
+    const pos = orbitPosition(b.aScaled, p.e, M);
+    b.mesh.position.set(pos.x, pos.z*Math.sin(b.inclRad), pos.z*Math.cos(b.inclRad));
+    b.mesh.rotation.y += dt*(24/Math.max(Math.abs(p.rotHours),1))*0.4*Math.sign(p.rotHours||1);
+    if(b.ringMesh) b.ringMesh.position.copy(b.mesh.position);
+  });
+
+  if(started){
+    const manual = manualInputActive();
+    if(manual){ autopilotEngaged = false; autoHoldOffset = null; }
+
+    if(autoHoldOffset){
+      // station-keeping: glue to target's moving reference frame
+      const pos = targetPosition(navTarget);
+      ship.position.copy(pos).add(autoHoldOffset);
+      shipVelocity.set(0,0,0);
+    } else if(autopilotEngaged && navTarget!==undefined && navTarget!==null){
+      const tPos = targetPosition(navTarget);
+      const tRadius = targetRadius(navTarget);
+      const toTarget = tPos.clone().sub(ship.position);
+      const dist = toTarget.length();
+      const dir = toTarget.clone().normalize();
+      const arrivalR = tRadius*4 + 3;
+      const slowR = Math.max(arrivalR*6, 14);
+      const desiredSpeed = dist < slowR ? AP_CRUISE_SPEED*Math.max(dist/slowR,0.02) : AP_CRUISE_SPEED;
+      const desiredVel = dir.clone().multiplyScalar(desiredSpeed);
+      const steer = desiredVel.sub(shipVelocity).clampLength(0, AP_MAX_ACCEL);
+      shipVelocity.add(steer.multiplyScalar(dt));
+
+      lookHelper.position.copy(ship.position);
+      lookHelper.lookAt(tPos);
+      ship.quaternion.slerp(lookHelper.quaternion, 1-Math.pow(0.0008, dt));
+
+      if(dist < arrivalR){
+        autoHoldOffset = ship.position.clone().sub(tPos);
+        autopilotEngaged = false;
+      }
+      ship.position.addScaledVector(shipVelocity, dt);
+    } else {
+      // manual flight
+      if(dragging){
+        ship.rotateY(-dragDX*TURN_RATE_MAX*dt);
+        ship.rotateX(-dragDY*TURN_RATE_MAX*dt);
+      }
+      if(keys.rollL) ship.rotateZ(ROLL_SPEED*dt);
+      if(keys.rollR) ship.rotateZ(-ROLL_SPEED*dt);
+
+      const forward = new THREE.Vector3(0,0,-1).applyQuaternion(ship.quaternion);
+      const boosted = !!keys.boost;
+      const accel = ACCEL * (boosted ? BOOST_MULT : 1);
+      const cap = boosted ? MAX_SPEED_BOOST : MAX_SPEED;
+
+      if(keys.thrust) shipVelocity.addScaledVector(forward, accel*dt);
+      if(keys.brake) shipVelocity.addScaledVector(forward, -accel*0.7*dt);
+
+      if(!keys.thrust && !keys.brake && dampenersOn){
+        shipVelocity.multiplyScalar(Math.pow(0.02, dt));
+      }
+      const curSpd = shipVelocity.length();
+      if(curSpd > cap) shipVelocity.setLength(THREE.MathUtils.lerp(curSpd, cap, Math.min(dt*2,1)));
+
+      ship.position.addScaledVector(shipVelocity, dt);
+
+      if(keys.thrust){
+        backwardTmp.copy(forward).multiplyScalar(-1);
+        engineWorldPos.copy(engineGlowL.getWorldPosition(new THREE.Vector3()));
+        spawnParticle(engineWorldPos, backwardTmp, 0.12, boosted);
+        engineWorldPos.copy(engineGlowR.getWorldPosition(new THREE.Vector3()));
+        spawnParticle(engineWorldPos, backwardTmp, 0.12, boosted);
+        if(boosted){
+          spawnParticle(engineWorldPos, backwardTmp, 0.2, boosted);
+        }
+      }
+    }
+
+    // engine glow intensity
+    const glowStrength = keys.thrust ? (keys.boost ? 1.6 : 1.0) : 0.25;
+    engineGlowL.scale.set(1.2*glowStrength,1.2*glowStrength,1);
+    engineGlowR.scale.set(1.2*glowStrength,1.2*glowStrength,1);
+
+    // update particles
+    particles.forEach(p=>{
+      if(p.life<=0){ p.sprite.material.opacity=0; return; }
+      p.life -= dt;
+      p.sprite.position.addScaledVector(p.vel, dt);
+      const t = Math.max(p.life/p.maxLife, 0);
+      p.sprite.material.opacity = t*0.85;
+      p.sprite.scale.set(0.35*(1.4-t), 0.35*(1.4-t), 1);
+    });
+
+    // camera
+    if(viewMode==='chase'){
+      chaseCamPos.copy(chaseOffset).applyQuaternion(ship.quaternion).add(ship.position);
+      camera.position.lerp(chaseCamPos, 1-Math.pow(0.0002, dt));
+      const lookAt = ship.position.clone().addScaledVector(new THREE.Vector3(0,0,-1).applyQuaternion(ship.quaternion), 6);
+      camera.up.copy(new THREE.Vector3(0,1,0).applyQuaternion(ship.quaternion));
+      camera.lookAt(lookAt);
+    } else {
+      chaseCamPos.copy(cockpitOffset).applyQuaternion(ship.quaternion).add(ship.position);
+      camera.position.copy(chaseCamPos);
+      camera.quaternion.copy(ship.quaternion);
+    }
+
+    drawRadar();
+    updateReticle(dt);
+
+    hudTimer += dt;
+    if(hudTimer > 0.12){
+      hudTimer = 0;
+      const spd = shipVelocity.length();
+      speedVal.textContent = spd.toFixed(1);
+      const throttlePct = Math.min((spd / (keys.boost?MAX_SPEED_BOOST:MAX_SPEED))*100, 100);
+      throttleFill.style.width = throttlePct + '%';
+      if(navTarget!==undefined && navTarget!==null) renderNavPanel();
+    }
+  }
+
+  renderer.render(scene, camera);
+}
+requestAnimationFrame(animate);
+
+})();
+</script>
+</body>
+</html>
