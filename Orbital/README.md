@@ -4,8 +4,8 @@
 ## Game Overview
 Pilot a spacecraft through a detailed solar system simulation with realistic orbital mechanics and Newtonian flight physics.
 
-- Explore the Solar System: Fly freely between planets, moons, and the sun
-- Navigation & Autopilot: Set navigation targets and engage autopilot for automated course plotting
+- **Explore the Solar System:** Fly freely between planets, moons, and the sun
+- **Navigation & Autopilot:** Set navigation targets and engage autopilot for automated course plotting
 
 
 
