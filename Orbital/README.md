@@ -6,6 +6,7 @@ Pilot a spacecraft through a detailed solar system simulation with realistic orb
 
 - **Explore the Solar System:** Fly freely between planets, moons, and the sun
 - **Navigation & Autopilot:** Set navigation targets and engage autopilot for automated course plotting
+- **Manual Flight Control:** Master Newtonian flight with thrust, roll, and pitch controls
 
 
 
