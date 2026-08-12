@@ -1,7 +1,8 @@
 # Orbital - Space Exploration Simulator
 - An immersive 3D space flight simulator with Newtonian physics, autopilot navigation, and a fully realized solar system.
-## Game Overview
 
+## Game Overview
+- Pilot a spacecraft through a detailed solar system simulation with realistic orbital mechanics and Newtonian flight physics.
 
 
 
