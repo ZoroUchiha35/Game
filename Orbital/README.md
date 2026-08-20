@@ -9,6 +9,8 @@ Pilot a spacecraft through a detailed solar system simulation with realistic orb
 - **Manual Flight Control:** Master Newtonian flight with thrust, roll, and pitch controls
 - **Real-time Telemetry:** Monitor speed, throttle, and position data as you travel
 
+## Controls
+
 
 
 <img width="1365" height="627" alt="image" src="https://github.com/user-attachments/assets/f73e5585-cf68-4658-9053-a832adf2285f" />
