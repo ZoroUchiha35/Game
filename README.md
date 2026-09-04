@@ -20,6 +20,7 @@ Play all games here: **https://zorouchiha35.github.io/Game/**
 | 🏓 **Ping Pong**                | Hit the ball past your opponent to score. Classic play with AI arcade fun.  |
 | 🛩️ **Sky Blade**          |Fly a jet through a neon city, collect coins, and dodge buildings. Boost, climb, and survive in this open-world 3D flight game.|
 | 🪐 **Orbital**            |Pilot your craft between planets, track speed and position, and enjoy the view.|
+|   **Digital Trip**
 
 ## ✨ Features
 
