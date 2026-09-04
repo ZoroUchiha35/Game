@@ -11,7 +11,7 @@ Pilot a spacecraft through a detailed solar system simulation with realistic orb
 
 ## Controls
 ### Keyboard Controls:
-- **W** - Forward thrust
+- **W** - Forward thrust                    - **X** - Toggle dampeners (slows ship when no thrust applied)
 - **S** - Reverse thrust (brake)
 - **Q** - Roll left
 - **E** - Roll right
