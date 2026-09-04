@@ -14,6 +14,7 @@ Pilot a spacecraft through a detailed solar system simulation with realistic orb
 - **W** - Forward thrust
 - **S** - Reverse thrust (brake)
 - **Q** - Roll left
+- **E** - Roll right
 
 
 <img width="1365" height="627" alt="image" src="https://github.com/user-attachments/assets/f73e5585-cf68-4658-9053-a832adf2285f" />
