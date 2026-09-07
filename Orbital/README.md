@@ -21,7 +21,7 @@ Pilot a spacecraft through a detailed solar system simulation with realistic orb
 
 ### Mouse/Touch Controls:
 - **Drag anywhere on screen** - Steer (pitch and yaw)
-- On-screen flight pad - Touch-friendly controls for thrust, roll, and boost
+- **On-screen flight pad** - Touch-friendly controls for thrust, roll, and boost
 
 
 
