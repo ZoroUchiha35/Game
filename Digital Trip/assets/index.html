@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en" itemscope itemtype="http://schema.org/Article">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta name="title" content="Digital Trip" />
+    <meta name="description" content="A story about the latest technologies through a short browser game. It's a fully 3d, based on WebGL, with external device or camera controls, bonuses & cryptocoins, which you can get as dogecoins. Fancy soundtrack enhances the experience. So the purpose of this non-profit open source project is industry promotion. Enjoy!" />
+    
+    <meta property="og:title" content="Digital Trip" />
+    <meta property="og:type" content="website"  />
+    <meta property="og:description" content="A story about the latest technologies through a short browser game. It's a fully 3d, based on WebGL, with external device or camera controls, bonuses & cryptocoins, which you can get as dogecoins. Fancy soundtrack enhances the experience. So the purpose of this non-profit open source project is industry promotion. Enjoy!" />
+    <meta property="og:image" content="http://dt.htdt.ru/img/poster.jpg" />
+
+    <title>Digital Trip</title>
+
+    <link rel="stylesheet" type="text/css" href="css/game.css" />
+    <link rel="icon" type="image/png" href="img/0.png">
+    <link rel="image_src" href="http://dt.htdt.ru/img/poster.jpg" />
+</head>
+<body>
+    <!-- game inrterface -->
+    <div id="interface">
+        <div class="score">
+            <span class="current_coins">0</span>
+            <img src="img/doge.png" height="50" width="50" alt="">
+        </div>
+        <div class="bonus"></div>
+    </div>
+
+    <!-- loading -->
+    <div class="loader" id="loader">
+        <div class="cont">
+            <div class="loading" id="loading">
+            </div>
+        </div>
+    </div>
+
+    <!-- no game -->
+    <div id="nogame">
+        <div class="cont">
+            <div class="nogame1">your web browser actually <br>doesn't support webgl</div>
+            <div class="nogame2">please try again using <a href="https://www.google.ru/intl/ru/chrome/browser/" target="_blank">google chrome</a><br><a href="http://hotdot.pro/portfolio/trip/" target="_blank">ABOUT THE PROJECT</a></div>
+        </div>
+    </div>
+
+    <!-- control -->
+    <div class="choose_control">
+        <div class="logo" id="logo1">
+            <img src="img/logo.svg" alt="">
+        </div>
+        <div class="byhotdot">by hot dot</div>
+        <div class="message">choose controls</div>
+        <div class="controls">
+            <div class="choose_wasd button">
+                <div class="rect">
+                    <div class="quad quad1"></div>
+                    <div class="quad quad2"></div>
+                    <div class="quad quad3"></div>
+                    <div class="quad quad4"></div>
+                </div>
+                <span>Keyboard</span></div>
+            <div class="choose_mobile button">
+                <div class="rect">
+                    <div class="quad"></div>
+                </div>
+                <span>Mobile</span></div>
+            <div class="choose_webcam button">
+                <div class="rect">
+                    <div class="quad"></div>
+                </div>
+                <span>Webcam</span></div>
+        </div>
+        <a class="chromeexperiments" href="http://www.chromeexperiments.com/detail/digital-trip/" target="_blank"><img src="img/chromeexperiments.png" height="62" width="106" alt=""></a>
+    </div>
+
+    <!-- mobile_choosen -->
+    <div class="mobile_choosen">
+        <div class="cont">
+            <div class="mobile_message">Please open<br><span class="red"></span><br>with your phone or use qr code below</div>
+            <div id="qrcode"></div>
+            <div class="change_controls mobile_control">change controls</div>
+        </div>
+    </div>
+
+    <!-- webcam_choosen -->
+    <div class="webcam_choosen">
+        <div class="cont">
+            <div class="webcam_message">Please allow access<br>to your webcam</div>
+            <div class="turn_to_start">
+                <img src="img/head.png" height="67" width="145" alt="" id="head">
+                <img id="left_v_check" src="img/vcheck.png" height="81" width="108" alt="">
+                <img id="right_v_check" src="img/vcheck.png" height="81" width="108" alt="">
+                <span></span>
+            </div>
+            <div class="change_controls webcam_control">change controls</div>
+        </div>
+    </div>
+
+    <!-- footer -->
+    <div id="footer">
+        <span class="left">Press <span class="red">F</span> to fullscreen, <span class="red">M</span> to mute and <span class="red">Space</span> to play/pause
+        </span>
+        <span class="right"><a href="https://github.com/htdt/digital_trip" target="_blank">github</a> <a id="share-link" href="">share</a> <a href="http://hotdot.pro/portfolio/trip/" target="_blank">about</a> <a href="http://hotdot.pro/" target="_blank" class="hotdot"><img src="img/hotdot.png"></a></span>
+    </div>
+
+    <!-- pause menu -->
+    <div class="pause">
+        <div class="cont">
+            <div class="social">
+                <a target="_blank" href="http://www.facebook.com/sharer.php?u=http://dt.htdt.ru/?v=2"><div class="fb"></div></a>
+                <a target="_blank" href="http://twitter.com/share?url=http://dt.htdt.ru/&text=A+WebGL+immersion+into+digital+space"><div class="tw"></div></a>
+                <a target="_blank" href="http://vkontakte.ru/share.php?url=http://dt.htdt.ru/"><div class="vk"></div></a>
+                <a target="_blank" href="https://plus.google.com/share?url=http://dt.htdt.ru/"><div class="gp"></div></a>
+            </div>
+            <div class="resume">resume</div>
+            <div class="change_controls pause_control">change controls</div>
+            <div class="back"></div>
+        </div>
+    </div>
+
+    <!-- share -->
+    <div class="share">
+        <div class="cont">
+            <div class="social">
+                <a target="_blank" href="http://www.facebook.com/sharer.php?u=http://dt.htdt.ru/?v=2"><div class="fb"></div></a>
+                <a target="_blank" href="http://twitter.com/share?url=http://dt.htdt.ru/&text=A+WebGL+immersion+into+digital+space"><div class="tw"></div></a>
+                <a target="_blank" href="http://vkontakte.ru/share.php?url=http://dt.htdt.ru/"><div class="vk"></div></a>
+                <a target="_blank" href="https://plus.google.com/share?url=http://dt.htdt.ru/"><div class="gp"></div></a>
+            </div>
+            <div class="resume">resume</div>
+            <div class="back"></div>
+        </div>
+    </div>
+
+    <!-- hit action -->
+    <div class="hit">
+        <div class="cont">
+            <span class="error"></span>
+        </div>
+    </div>
+
+    <!-- game over -->
+    <div class="game_over">
+        <div class="cont">
+            <div class="coins">
+                <div class="gameover_message">Such <span class="total_coins"></span>Ð</div>
+                <input id="dogecoin" type="text" placeholder="YOUR DOGECOIN ID">
+                <button id="wow">wow</button>
+                <div id="gameovermessage"></div>
+            </div>
+            <div class="change_controls gameover_control">change controls</div>
+            <div class="restart">restart</div>
+        </div>
+    </div>
+
+    <!-- webcam control -->
+    <div class="webcamcontrol">
+        <div class="cont cam">
+            <div class="center"></div>
+            <canvas id="compare" width="120" height="90"></canvas>
+            <canvas id="overlay" width="120" height="90"></canvas>
+            <video id="vid" autoplay loop width="320" height="340" style="display:none; z-index: 20; position: absolute; right:0px; top:0px;"></video>
+        </div>
+    </div>
+
+    <!-- webgl check -->
+    <canvas id="checkwebgl" style="display:none;"></canvas>
+
+    <script src="js/vendor/jquery.min.js"></script>
+    <!-- download manager -->
+    <script src="js/vendor/yepnope.1.5.4-min.js"></script>
+    <script src="js/myYepnope.min.js"></script>
+
+    <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+(function (d, w, c) {
+    (w[c] = w[c] || []).push(function() {
+        try {
+            w.yaCounter25500392 = new Ya.Metrika({id:25500392,
+                    accurateTrackBounce:true});
+        } catch(e) { }
+    });
+
+    var n = d.getElementsByTagName("script")[0],
+        s = d.createElement("script"),
+        f = function () { n.parentNode.insertBefore(s, n); };
+    s.type = "text/javascript";
+    s.async = true;
+    s.src = (d.location.protocol == "https:" ? "https:" : "http:") + "//mc.yandex.ru/metrika/watch.js";
+
+    if (w.opera == "[object Opera]") {
+        d.addEventListener("DOMContentLoaded", f, false);
+    } else { f(); }
+})(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="//mc.yandex.ru/watch/25500392" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+
+</body>
+</html>
