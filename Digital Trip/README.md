@@ -1,8 +1,5 @@
 Digital Trip
 ============
-
-<a href="https://htdt.github.io/digital_trip/" target="_blank">Play static version</a>
-
 Server-side features (mobile controls, dogecoins) are not available in static version. Full version is on master branch.
 
 Description
